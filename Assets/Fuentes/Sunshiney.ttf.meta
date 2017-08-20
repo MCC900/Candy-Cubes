@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: 31870ea51e51848468ef32229d544f58
+timeCreated: 1496377970
+licenseType: Free
+TrueTypeFontImporter:
+  serializedVersion: 4
+  fontSize: 100
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontName: Sunshiney
+  fontNames:
+  - Sunshiney
+  fallbackFontReferences: []
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

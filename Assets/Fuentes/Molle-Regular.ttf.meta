@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: 9651eb380b55ad34498dc85de26d304b
+timeCreated: 1496377561
+licenseType: Free
+TrueTypeFontImporter:
+  serializedVersion: 4
+  fontSize: 100
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontName: Molle
+  fontNames:
+  - Molle
+  fallbackFontReferences: []
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
