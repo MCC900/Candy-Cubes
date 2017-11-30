@@ -5,4 +5,5 @@ using UnityEngine;
 public abstract class LayoutActualizable : MonoBehaviour {
 
 	public abstract void actualizar();
+
 }

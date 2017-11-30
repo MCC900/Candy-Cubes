@@ -2,13 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TextoAdaptativo : LayoutActualizable {
+public class TextoAdaptativo : MonoBehaviour {
 
 	public float altoBaseTexto = 100;
 	public float coeficienteTamano = 8;
 
 	[ContextMenu("Actualizar")]
-	override public void actualizar(){
+	public void actualizar(){
 		TextMesh tm = GetComponent<TextMesh> ();
 		RectTransform rtPadre = transform.parent.GetComponent<RectTransform> ();
 		tm.characterSize = (rtPadre.rect.height / altoBaseTexto) * coeficienteTamano;

@@ -24,7 +24,7 @@ public class Logo : MonoBehaviour {
 		RectTransform rt = this.GetComponent<RectTransform>();
 		proporcionBase = rt.sizeDelta.x / rt.sizeDelta.y;
 		rt.sizeDelta = new Vector2 (ancho, ancho / proporcionBase);
-		QuadPanel qp = GetComponent<QuadPanel> ();
-		qp.crearMesh ();
+		//QuadPanel qp = GetComponent<QuadPanel> ();
+		//qp.crearMesh ();
 	}
 }
