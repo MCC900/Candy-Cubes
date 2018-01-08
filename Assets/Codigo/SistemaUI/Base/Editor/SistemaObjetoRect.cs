@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEditor;
 using UnityEngine.SceneManagement;
 using System;
+using System.Linq;
 
 [InitializeOnLoad]
 class SistemaObjetoRect {
@@ -26,6 +27,7 @@ class SistemaObjetoRect {
 			List<ObjetoRectUpdateChecker> aEliminar = new List<ObjetoRectUpdateChecker> ();
 			if (actualizacionesAutomaticas) {
 				foreach (ObjetoRectUpdateChecker rmuc in objetoRectCheckers) {
+					
 					if (rmuc.existeObjeto ()) {
 						rmuc.tryUpdate ();
 					} else {
@@ -42,6 +44,16 @@ class SistemaObjetoRect {
 	static void actualizarListaRectMeshes(){
 		objetoRectCheckers = new List<ObjetoRectUpdateChecker> ();
 		GameObject[] objetosRaiz = SceneManager.GetActiveScene ().GetRootGameObjects ();
+
+		List<IObjetoRectAutoajustable> componentes = new List<IObjetoRectAutoajustable> ();
+		for (int i = 0; i < objetosRaiz.Length; i++) {
+			componentes.AddRange(objetosRaiz [i].GetComponentsInChildren<IObjetoRectAutoajustable>());
+		}
+		foreach (IObjetoRectAutoajustable c in componentes) {
+			objetoRectCheckers.Add (new ObjetoRectUpdateChecker (c));
+		}
+
+		/*
 		List<QuadUI> quadUIs = encontrarComponentesHijos<QuadUI> (objetosRaiz);
 		foreach (QuadUI qui in quadUIs) {
 			objetoRectCheckers.Add(new ObjetoRectUpdateChecker(qui));
@@ -54,6 +66,7 @@ class SistemaObjetoRect {
 		foreach (Objeto3DUI obj3d in obj3DUIs) {
 			objetoRectCheckers.Add(new ObjetoRectUpdateChecker(obj3d));
 		}
+		*/
 	}
 		
 	static List<T> encontrarComponentesHijos<T>(GameObject[] objetosPadre){
