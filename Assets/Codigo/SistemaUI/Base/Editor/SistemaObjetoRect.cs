@@ -52,21 +52,6 @@ class SistemaObjetoRect {
 		foreach (IObjetoRectAutoajustable c in componentes) {
 			objetoRectCheckers.Add (new ObjetoRectUpdateChecker (c));
 		}
-
-		/*
-		List<QuadUI> quadUIs = encontrarComponentesHijos<QuadUI> (objetosRaiz);
-		foreach (QuadUI qui in quadUIs) {
-			objetoRectCheckers.Add(new ObjetoRectUpdateChecker(qui));
-		}
-		List<PanelUI> panelUIs = encontrarComponentesHijos<PanelUI> (objetosRaiz);
-		foreach (PanelUI pui in panelUIs) {
-			objetoRectCheckers.Add(new ObjetoRectUpdateChecker(pui));
-		}
-		List<Objeto3DUI> obj3DUIs = encontrarComponentesHijos<Objeto3DUI> (objetosRaiz);
-		foreach (Objeto3DUI obj3d in obj3DUIs) {
-			objetoRectCheckers.Add(new ObjetoRectUpdateChecker(obj3d));
-		}
-		*/
 	}
 		
 	static List<T> encontrarComponentesHijos<T>(GameObject[] objetosPadre){

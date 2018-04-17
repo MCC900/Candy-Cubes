@@ -6,7 +6,6 @@ using System.IO;
 public class PanelUI : MonoBehaviour, IObjetoRectAutoajustable {
 	public enum TipoRepeticionPanelUI{REPETIR, AJUSTAR};
 
-
 	public Material material;
 	public Sprite spriteReferencia;
 	public Vector2 tamanoEsquinaTopLeft = new Vector2(20,20);
@@ -27,6 +26,8 @@ public class PanelUI : MonoBehaviour, IObjetoRectAutoajustable {
 	//=======CORUTINAS=======
 	bool ejecActualizarMesh = false;
 
+	bool inicializado = false;
+
 	//----------------EVENTOS UNITY-----------------------
 	void Awake(){
 		init ();
@@ -40,14 +41,19 @@ public class PanelUI : MonoBehaviour, IObjetoRectAutoajustable {
 	void OnRectTransformDimensionsChange(){
 		actualizarMesh ();
 	}
+
+	void OnValidate(){
+		if(inicializado)
+			actualizarObjetoRectEditor();
+	}
 		
 	//---------------------------------------------------
 	//-----------------INICIALIZACIÓN--------------------
 
 	[ContextMenu("Init")]
 	void init(){
+		inicializado = true;
 		actualizarAsociarComponentes ();
-
 		this.meshFilter.mesh = new Mesh ();
 		actualizarMesh ();
 	}
@@ -62,6 +68,10 @@ public class PanelUI : MonoBehaviour, IObjetoRectAutoajustable {
 		}
 	} //+------+//
 	IEnumerator corActualizarMesh(){
+		
+		//!!! -- NO VERIFICA DESAPARICIÓN O CAMBIO EN LOS COMPONENTES ASOCIADOS POR TEMAS DE EFICIENCIA.
+		//TODO ACTUALIZACIÓN EXTERNA AL CAMBIAR O ELIMINARSE RectTransform, MeshFilter o MeshRenderer
+
 		yield return new WaitForEndOfFrame ();
 		this.generarMesh ();
 		MeshGen.actualizarMesh (this.meshFilter.mesh, true);
@@ -69,7 +79,7 @@ public class PanelUI : MonoBehaviour, IObjetoRectAutoajustable {
 
 	[ContextMenu("Actualizar Mesh")]
 	public void actualizarObjetoRectEditor(){
-		this.actualizarAsociarComponentes ();
+		this.actualizarAsociarComponentes (); //Estamos en el editor, no nos preocupa eficiencia y se cambian/borran componentes constantemente
 		this.generarSubMateriales ();
 		this.generarMesh ();
 		this.meshFilter.sharedMesh = MeshGen.getMesh (true);
@@ -87,7 +97,7 @@ public class PanelUI : MonoBehaviour, IObjetoRectAutoajustable {
 		this.actualizarObjetoRectEditor ();
 	}
 
-	void actualizarAsociarComponentes(){
+	public void actualizarAsociarComponentes(){
 		this.rectTransform = GetComponent<RectTransform> ();
 		this.meshFilter = GetComponent<MeshFilter> ();
 		this.meshRenderer = GetComponent<MeshRenderer> ();

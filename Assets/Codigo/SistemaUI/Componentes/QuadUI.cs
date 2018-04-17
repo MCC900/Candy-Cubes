@@ -14,6 +14,8 @@ public class QuadUI : MonoBehaviour, IObjetoRectAutoajustable {
 	//======PROPIEDADES======
 	static Vector2[] uvs = { new Vector2 (0, 0), new Vector2 (0, 1), new Vector2 (1, 1), new Vector2 (1, 0) };
 
+	bool inicializado = false;
+
 	//----------------EVENTOS UNITY-----------------------
 	void Awake(){
 		init ();
@@ -28,11 +30,17 @@ public class QuadUI : MonoBehaviour, IObjetoRectAutoajustable {
 		actualizarMesh ();
 	}
 
+	void OnValidate(){
+		if(inicializado)
+			actualizarObjetoRectEditor();
+	}
+
 	//---------------------------------------------------
 	//-----------------INICIALIZACIÓN--------------------
 
 	[ContextMenu("Init")]
 	void init(){
+		inicializado = true;
 		actualizarAsociarComponentes ();
 
 		this.meshFilter.mesh = new Mesh ();
@@ -49,23 +57,32 @@ public class QuadUI : MonoBehaviour, IObjetoRectAutoajustable {
 		}
 	} //+------+//
 	IEnumerator corActualizarMesh(){
+		//!!! -- NO VERIFICA DESAPARICIÓN O CAMBIO EN LOS COMPONENTES ASOCIADOS POR TEMAS DE EFICIENCIA.
+		//TODO ACTUALIZACIÓN EXTERNA AL CAMBIAR O ELIMINARSE RectTransform o MeshFilter
+
 		yield return new WaitForEndOfFrame ();
 		this.generarMesh ();
 		MeshGen.actualizarMesh (this.meshFilter.mesh, true);
 	}
 	[ContextMenu("Actualizar Mesh")]
 	public void actualizarObjetoRectEditor(){
-		this.actualizarAsociarComponentes ();
+		this.actualizarAsociarComponentes (); //Estamos en el editor, no nos preocupa eficiencia y se cambian/borran componentes constantemente
 		this.generarMesh ();
 		this.meshFilter.mesh = MeshGen.getMesh (true);
 	}
 
-
-	void actualizarAsociarComponentes(){
-		this.rectTransform = GetComponent<RectTransform> ();
-		this.meshFilter = GetComponent<MeshFilter> ();
+	public void actualizarAsociarComponentes(){
+		actualizarAsociarRectTransform ();
+		actualizarAsociarMeshFilter ();
 	}
 
+	public void actualizarAsociarRectTransform(){
+		this.rectTransform = GetComponent<RectTransform> ();
+	}
+
+	public void actualizarAsociarMeshFilter(){
+		this.meshFilter = GetComponent<MeshFilter> ();
+	}
 	//---------------------------------------------------
 	//-----------------AUTOGENERADO----------------------
 	void generarMesh(){

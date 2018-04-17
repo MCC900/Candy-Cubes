@@ -24,7 +24,7 @@ public class GrillaSeleccion : MonoBehaviour {
 	void generarBotones(){
 		botonesSelNivel = new GameObject[maxBotones];
 
-		botonesSelNivel[0] = Instantiate (botonSelNivel, this.transform);
+		botonesSelNivel [0] = Instantiate (botonSelNivel, this.transform);
 
 		for (var i = 1; i < maxBotones; i++) {
 			botonesSelNivel[i] = Instantiate (botonesSelNivel[0], this.transform);

@@ -8,11 +8,14 @@ public class Objeto3DUI : MonoBehaviour, IObjetoRectAutoajustable {
 	public bool mantenerProporcion = true;
 
 	//======COMPONENTES======
+	RectTransform rtPadre;
 	RectTransform rectTransform;
 	MeshFilter meshFilter;
 
 	//=======CORUTINAS=======
 	bool ejecActualizarEscala = false;
+
+	bool inicializado = false;
 
 	//----------------EVENTOS UNITY-----------------------
 
@@ -29,19 +32,25 @@ public class Objeto3DUI : MonoBehaviour, IObjetoRectAutoajustable {
 		actualizarEscala ();
 	}
 
+	void OnValidate(){
+		if(inicializado)
+			actualizarObjetoRectEditor();
+	}
+
 	//---------------------------------------------------
 	//-----------------INICIALIZACIÓN--------------------
 
 	[ContextMenu("Init")]
 	void init(){
+		inicializado = true;
 		this.actualizarAsociarComponentes ();
 	}
 
 	//---------------------------------------------------
 	//-----------------ACTUALIZACIÓN---------------------
 	void setCalcularEscala(){
-		float ancho = this.rectTransform.rect.width;
-		float alto = this.rectTransform.rect.height;
+		float ancho = this.rtPadre.rect.width;
+		float alto = this.rtPadre.rect.height;
 
 		float meshTamanoX = this.meshFilter.sharedMesh.bounds.extents.x * 2;
 		float meshTamanoY = this.meshFilter.sharedMesh.bounds.extents.y * 2;
@@ -55,6 +64,10 @@ public class Objeto3DUI : MonoBehaviour, IObjetoRectAutoajustable {
 			float coefy = alto / meshTamanoY;
 			float coef = Mathf.Min (coefx, coefy);
 			escala = new Vector3 (coef * this.escalaRelativa.x, coef * this.escalaRelativa.y, coef * this.escalaRelativa.z);
+			//this.rectTransform.localPosition = Vector3.zero;
+			this.rectTransform.SetSizeWithCurrentAnchors (RectTransform.Axis.Horizontal, meshTamanoX);
+			this.rectTransform.SetSizeWithCurrentAnchors (RectTransform.Axis.Vertical, meshTamanoY);
+
 		}
 
 		this.transform.localScale = escala;
@@ -67,18 +80,35 @@ public class Objeto3DUI : MonoBehaviour, IObjetoRectAutoajustable {
 		}
 	} //+------+//
 	IEnumerator corActualizarEscala(){
+		//!!! -- NO VERIFICA DESAPARICIÓN O CAMBIO EN LOS COMPONENTES ASOCIADOS POR TEMAS DE EFICIENCIA.
+		//TODO ACTUALIZACIÓN EXTERNA AL CAMBIAR O ELIMINARSE RectTransform o MeshFilter
+
 		yield return new WaitForEndOfFrame ();
 		this.setCalcularEscala ();
 	}
 	[ContextMenu("Actualizar Mesh")]
 	public void actualizarObjetoRectEditor(){
-		this.actualizarAsociarComponentes ();
+		this.actualizarAsociarComponentes (); //Estamos en el editor, no nos preocupa eficiencia y se cambian/borran componentes constantemente
 		this.setCalcularEscala ();
 	}
 
 	//---------------------------------------------------
-	void actualizarAsociarComponentes(){
+	public void actualizarAsociarComponentes(){
+		actualizarAsociarRectPadre ();
+		actualizarAsociarRectTransform ();
+		actualizarAsociarMeshFilter ();
+	}
+
+	public void actualizarAsociarRectPadre(){
+		if(transform.parent)
+			this.rtPadre = transform.parent.GetComponent<RectTransform> ();
+	}
+
+	public void actualizarAsociarRectTransform(){
 		this.rectTransform = GetComponent<RectTransform> ();
+	}
+
+	public void actualizarAsociarMeshFilter(){
 		this.meshFilter = GetComponent<MeshFilter> ();
 	}
 }
