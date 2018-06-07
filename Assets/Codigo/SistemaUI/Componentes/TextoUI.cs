@@ -34,8 +34,10 @@ public class TextoUI : MonoBehaviour, IObjetoRectAutoajustable {
 	}
 
 	void OnValidate(){
-		if(inicializado)
-			actualizarObjetoRectEditor();
+		if (inicializado)
+			actualizarObjetoRectEditor ();
+		else
+			init ();
 	}
 	//---------------------------------------------------
 	//-----------------INICIALIZACIÓN--------------------
@@ -79,13 +81,17 @@ public class TextoUI : MonoBehaviour, IObjetoRectAutoajustable {
 		int anchoTexto = 0;
 		char[] caracteres = textMesh.text.ToCharArray ();
 		foreach (char c in caracteres) {
-			CharacterInfo ci;
-			textMesh.font.GetCharacterInfo (c, out ci, 100);
+			CharacterInfo ci = new CharacterInfo();
+			//TODO Eliminar uso de RequestCharactersInTexture
+			textMesh.font.RequestCharactersInTexture (textMesh.text, 100, textMesh.fontStyle);
+			textMesh.font.GetCharacterInfo (c, out ci, 100, textMesh.fontStyle);
 			anchoTexto += ci.advance;
 		}
+
 		int tamFuenteSegunAlto = (int)(rectTransform.rect.height * coeficienteTamano * ((float)textMesh.font.lineHeight / textMesh.font.ascent));
-		int tamFuenteSegunAncho = (int)(((float)rectTransform.rect.width * 100) / anchoTexto);
+		int tamFuenteSegunAncho = (int)(((float)rectTransform.rect.width / anchoTexto)* 100F) ;
 		textMesh.fontSize = Math.Min (tamFuenteSegunAlto, tamFuenteSegunAncho);
+		Debug.Log(rectTransform.rect.width + " <W, " + textMesh.text + ": " + anchoTexto +",..." + tamFuenteSegunAlto + ",  " + tamFuenteSegunAncho);
 		//TODO Ofrecer opciones apropiadas para decidir como se ajusta el texto
 
 	}

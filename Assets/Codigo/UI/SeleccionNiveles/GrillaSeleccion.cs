@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class GrillaSeleccion : MonoBehaviour {
 
@@ -33,16 +34,38 @@ public class GrillaSeleccion : MonoBehaviour {
 
 	void numerarBotones(int numPrimero){
 		for (var i = 0; i < maxBotones; i++) {
-			TextMesh tm = botonesSelNivel [i].GetComponentInChildren<TextMesh> ();
-			tm.text = (numPrimero + i).ToString ();
+			TextMeshProUGUI tmp = botonesSelNivel [i].GetComponentInChildren<TextMeshProUGUI> ();
+			tmp.text = (numPrimero + i).ToString ();
 		}
 	}
 
 	int getMaxCantBotones(){
 		RectTransform rt = GetComponent<RectTransform> ();
 		GridLayoutGroup glg = GetComponent<GridLayoutGroup> ();
-		int cantx = Mathf.FloorToInt (rt.rect.width / glg.cellSize.x);
-		int canty = Mathf.FloorToInt (rt.rect.height / glg.cellSize.y);
+		//int cantx = Mathf.FloorToInt (rt.rect.width / glg.cellSize.x);
+		//int canty = Mathf.FloorToInt (rt.rect.height / glg.cellSize.y);
+		int cantx = 0;
+		float cuentax = 0;
+		while (true) {
+			cuentax += glg.cellSize.x;
+			if (cuentax > rt.rect.width) {
+				break;
+			} else {
+				cantx++;
+				cuentax += glg.spacing.x;
+			}
+		}
+		int canty = 0;
+		float cuentay = 0;
+		while (true) {
+			cuentay += glg.cellSize.y;
+			if (cuentay > rt.rect.height) {
+				break;
+			} else {
+				canty++;
+				cuentay += glg.spacing.y;
+			}
+		}
 		return cantx * canty;
 	}
 

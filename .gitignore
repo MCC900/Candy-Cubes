@@ -79,3 +79,7 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+#Assets y librerias 3rd party
+#------TextMesh Pro. Version requerida: v1.2.2------
+/Assets/TextMesh*Pro/ 
