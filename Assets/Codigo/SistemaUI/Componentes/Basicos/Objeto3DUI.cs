@@ -4,15 +4,16 @@ using UnityEngine;
 
 public class Objeto3DUI : MonoBehaviour, IObjetoRectAutoajustable {
 
+	//=====PROPIEDADES AJUSTABLES=====
 	public Vector3 escalaRelativa = new Vector3(1,1,1);
 	public bool mantenerProporcion = true;
 
-	//======COMPONENTES======
+	//==========COMPONENTES===========
 	RectTransform rtPadre;
 	RectTransform rectTransform;
 	MeshFilter meshFilter;
 
-	//=======CORUTINAS=======
+	//===========CORUTINAS============
 	bool ejecActualizarEscala = false;
 
 	bool inicializado = false;
@@ -92,7 +93,6 @@ public class Objeto3DUI : MonoBehaviour, IObjetoRectAutoajustable {
 		this.setCalcularEscala ();
 	}
 
-	//---------------------------------------------------
 	public void actualizarAsociarComponentes(){
 		actualizarAsociarRectPadre ();
 		actualizarAsociarRectTransform ();
@@ -111,4 +111,6 @@ public class Objeto3DUI : MonoBehaviour, IObjetoRectAutoajustable {
 	public void actualizarAsociarMeshFilter(){
 		this.meshFilter = GetComponent<MeshFilter> ();
 	}
+
+	//---------------------------------------------------
 }

@@ -34,12 +34,13 @@ public class GrillaSeleccion : MonoBehaviour {
 
 	void numerarBotones(int numPrimero){
 		for (var i = 0; i < maxBotones; i++) {
-			TextMeshProUGUI tmp = botonesSelNivel [i].GetComponentInChildren<TextMeshProUGUI> ();
+			TextMeshPro tmp = botonesSelNivel [i].GetComponentInChildren<TextMeshPro> ();
 			tmp.text = (numPrimero + i).ToString ();
 		}
 	}
 
 	int getMaxCantBotones(){
+		
 		RectTransform rt = GetComponent<RectTransform> ();
 		GridLayoutGroup glg = GetComponent<GridLayoutGroup> ();
 		//int cantx = Mathf.FloorToInt (rt.rect.width / glg.cellSize.x);
