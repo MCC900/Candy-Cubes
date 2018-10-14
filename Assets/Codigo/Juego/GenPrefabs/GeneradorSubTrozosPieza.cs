@@ -7,29 +7,86 @@ using System.IO;
 public class GeneradorSubTrozosPieza : MonoBehaviour {
 
 	public float umbral = 0.0001F;
-	public Material materialEsquina;
+	public Material[] materialesEsquina;
 
-	[ContextMenu("Quitar originales")]
-	void quitarOriginales(){
+	[ContextMenu("Cambiar Z por Y")]
+	void cambiarZporY(){
 		for (int i = 0; i < transform.childCount; i++) {
 			Transform hijo = transform.GetChild (i);
-			DestroyImmediate (hijo.GetComponent<MeshFilter> ());
-			DestroyImmediate (hijo.GetComponent<MeshRenderer> ());
+			string nombre = hijo.gameObject.name;
+			if (nombre.Substring (nombre.Length - 1) == "Y") {
+				nombre = nombre.Substring (0, nombre.Length - 1) + "Z";
+			} else if (nombre.Substring (nombre.Length - 1) == "Z") {
+				nombre = nombre.Substring (0, nombre.Length - 1) + "Y";
+			}
+			hijo.gameObject.name = nombre;
 		}
 	}
 
-	[ContextMenu("Asignar Material")]
-	void asignarMaterial(){
-		int countHijos = transform.childCount;
+	[ContextMenu("Ocultar originales")]
+	void ocultarOriginales(){
 		for (int i = 0; i < transform.childCount; i++) {
 			Transform hijo = transform.GetChild (i);
-			for(int j = 0; j < hijo.childCount; j++){
-				GameObject subHijo = hijo.GetChild (j).gameObject;
-				subHijo.GetComponent<MeshRenderer> ().sharedMaterial = materialEsquina;
+			hijo.GetComponent<MeshRenderer> ().enabled = false;
+		}
+	}
 
+	[ContextMenu("Mostrar originales")]
+	void mostrarOriginales(){
+		for (int i = 0; i < transform.childCount; i++) {
+			Transform hijo = transform.GetChild (i);
+			hijo.GetComponent<MeshRenderer> ().enabled = true;
+		}
+	}
+
+	[ContextMenu("Asignar Materiales")]
+	void asignarMateriales(){
+
+		List<Material> materialesOrig = new List<Material> ();
+
+		for (int i = 0; i < transform.childCount; i++) {
+			Transform hijo = transform.GetChild (i);
+			MeshRenderer mr = hijo.GetComponent<MeshRenderer> ();
+			foreach (Material m in mr.sharedMaterials) {
+				if (!materialesOrig.Contains (m)) {
+					materialesOrig.Add (m);
+				}
 			}
 		}
+
+		Material[] arrayMats = materialesOrig.ToArray ();
+
+		for (int i = 0; i < transform.childCount; i++) {
+			Transform hijo = transform.GetChild (i);
+
+			for (int j = 0; j < hijo.childCount; j++) {
+				Transform subHijo = hijo.GetChild (j);
+				MeshRenderer mrSubHijo = subHijo.GetComponent<MeshRenderer> ();
+				List<Material> matsSubHijoNuevos = new List<Material> ();
+				foreach (Material m in mrSubHijo.sharedMaterials) {
+					for (int k = 0; k < arrayMats.Length; k++) {
+						if (m == arrayMats [k]) {
+							matsSubHijoNuevos.Add (materialesEsquina [k]);
+						}
+					}
+				}
+				mrSubHijo.sharedMaterials = matsSubHijoNuevos.ToArray ();
+			}
+
+			MeshRenderer mrHijo = hijo.GetComponent<MeshRenderer> ();
+			List<Material> matsHijoNuevos = new List<Material> ();
+
+			foreach (Material m in mrHijo.sharedMaterials) {
+				for (int j = 0; j < arrayMats.Length; j++) {
+					if (m == arrayMats [j]) {
+						matsHijoNuevos.Add (materialesEsquina [j]);
+					}
+				}
+			}
+			mrHijo.sharedMaterials = matsHijoNuevos.ToArray ();
+		}
 	}
+
 	[ContextMenu("Limpiar")]
 	void limpiar(){
 		int countHijos = transform.childCount;
@@ -78,7 +135,7 @@ public class GeneradorSubTrozosPieza : MonoBehaviour {
 				if (!sobreescribir) {
 					Mesh modelo = hijo.GetComponent<MeshFilter> ().sharedMesh;
 					string ruta = AssetDatabase.GetAssetPath (modelo.GetInstanceID ());
-					ruta = ruta.Substring (0, ruta.LastIndexOf ('/') + 1) + hijo.name;
+					ruta = ruta.Substring (0, ruta.LastIndexOf ('/') + 1) + nombre;
 					generar = !Directory.Exists (ruta);
 				}
 				if (generar) {
@@ -94,7 +151,7 @@ public class GeneradorSubTrozosPieza : MonoBehaviour {
 		AssetDatabase.SaveAssets ();
 	}
 
-	string[] nombresSubTrozos = {"PPP","PPN","PNP","PNN","NPP","NPN","NNP","NNN"};
+	string[] nombresSubTrozos = {"PPN","PNN","PPP","PNP","NPN","NNN","NPP","NNP"};
 
 	/// <summary>
 	/// Subdivide el trozo en 8 subtrozos según los 8 octantes del sistema cartesiano. (!) IMPORTANTE (!) Este algoritmo ASUME 2 cosas:
@@ -108,60 +165,76 @@ public class GeneradorSubTrozosPieza : MonoBehaviour {
 		Mesh modelo = transf.GetComponent<MeshFilter> ().sharedMesh;
 
 		List<Vector3>[] vertsOctantes = new List<Vector3>[8];
-		List<int>[] trisOctantes = new List<int>[8];
+		List<int>[,] trisOctantes = new List<int>[8, modelo.subMeshCount];
 		List<Vector2>[] uvsOctantes = new List<Vector2>[8];
 		List<Vector3>[] normsOctantes = new List<Vector3>[8];
+		bool[,] matsOctantes = new bool[8, modelo.subMeshCount];
 
 		for (int i = 0; i < 8; i++) {
 			vertsOctantes [i] = new List<Vector3> ();
-			trisOctantes [i] = new List<int> ();
+			for (int j = 0; j < modelo.subMeshCount; j++) {
+				trisOctantes [i, j] = new List<int> ();
+			}
 			uvsOctantes [i] = new List<Vector2> ();
 			normsOctantes[i] = new List<Vector3> ();
 		}
 
 		int[] indiceVert = new int[8];
-
-		int[] tris = modelo.triangles;
 		Vector3[] verts = modelo.vertices;
 		Vector2[] uvs = modelo.uv;
 		Vector3[] norms = modelo.normals;
+		for (int i = 0; i < modelo.subMeshCount; i++) {
 
-		for (int i = 0; i < modelo.triangles.Length; i += 3) {
-			int indV1 = tris [i];
-			int indV2 = tris [i + 1];
-			int indV3 = tris [i + 2];
-			Vector3 v1 = verts [indV1];
-			Vector3 v2 = verts [indV2];
-			Vector3 v3 = verts [indV3];
-			bool[] octantesV1 = getExistenciaOctantes (v1);
-			bool[] octantesV2 = getExistenciaOctantes (v2);
-			bool[] octantesV3 = getExistenciaOctantes (v3);
+			int[] tris = modelo.GetTriangles(i);
 
-			for (int j = 0; j < 8; j++) {
-				if (octantesV1 [j] && octantesV2 [j] && octantesV3 [j]) { //Los 3 vértices existen en el mismo octante
-					
-					vertsOctantes [j].Add (v1);
-					vertsOctantes [j].Add (v2);
-					vertsOctantes [j].Add (v3);
-					uvsOctantes [j].Add (uvs[indV1]);
-					uvsOctantes [j].Add (uvs[indV2]);
-					uvsOctantes [j].Add (uvs[indV3]);
-					normsOctantes [j].Add (norms [indV1]);
-					normsOctantes [j].Add (norms [indV2]);
-					normsOctantes [j].Add (norms [indV3]);
-					trisOctantes [j].Add (indiceVert[j]);
-					trisOctantes [j].Add (indiceVert[j]+1);
-					trisOctantes [j].Add (indiceVert[j]+2);
-					indiceVert[j] += 3;
+			for (int j = 0; j < tris.Length; j += 3) {
+				int indV1 = tris [j];
+				int indV2 = tris [j + 1];
+				int indV3 = tris [j + 2];
+				Vector3 v1 = verts [indV1];
+				Vector3 v2 = verts [indV2];
+				Vector3 v3 = verts [indV3];
+				bool[] octantesV1 = getExistenciaOctantes (v1);
+				bool[] octantesV2 = getExistenciaOctantes (v2);
+				bool[] octantesV3 = getExistenciaOctantes (v3);
+
+				for (int k = 0; k < 8; k++) {
+					if (octantesV1 [k] && octantesV2 [k] && octantesV3 [k]) { //Los 3 vértices existen en el mismo octante
+						matsOctantes[k,i] = true;
+						vertsOctantes [k].Add (v1);
+						vertsOctantes [k].Add (v2);
+						vertsOctantes [k].Add (v3);
+						uvsOctantes [k].Add (uvs[indV1]);
+						uvsOctantes [k].Add (uvs[indV2]);
+						uvsOctantes [k].Add (uvs[indV3]);
+						normsOctantes [k].Add (norms [indV1]);
+						normsOctantes [k].Add (norms [indV2]);
+						normsOctantes [k].Add (norms [indV3]);
+						trisOctantes [k,i].Add (indiceVert[k]);
+						trisOctantes [k,i].Add (indiceVert[k]+1);
+						trisOctantes [k,i].Add (indiceVert[k]+2);
+						indiceVert[k] += 3;
+					}
 				}
 			}
 		}
-
+			
+		MeshRenderer meshrend = transf.GetComponent<MeshRenderer> ();
 
 		for (int i = 0; i < 8; i++) {
+			List<Material> mats = new List<Material> ();
+
 			Mesh meshSubTrozo = new Mesh ();
+			meshSubTrozo.subMeshCount = modelo.subMeshCount;
 			meshSubTrozo.vertices = vertsOctantes [i].ToArray ();
-			meshSubTrozo.triangles = trisOctantes [i].ToArray ();
+			int k = 0;
+			for (int j = 0; j < modelo.subMeshCount; j++) {
+				if (matsOctantes [i, j]) {
+					meshSubTrozo.SetTriangles (trisOctantes [i,j].ToArray(), k);
+					mats.Add (meshrend.sharedMaterials [j]);
+					k++;
+				}
+			}
 			meshSubTrozo.uv = uvsOctantes [i].ToArray ();
 			meshSubTrozo.normals = normsOctantes [i].ToArray ();
 			MeshUtility.Optimize (meshSubTrozo);
@@ -179,7 +252,7 @@ public class GeneradorSubTrozosPieza : MonoBehaviour {
 			MeshFilter mf = goSubTrozo.AddComponent<MeshFilter> ();
 			mf.sharedMesh = meshSubTrozo;
 
-			mr.sharedMaterial = transf.GetComponent<MeshRenderer> ().sharedMaterial;
+			mr.sharedMaterials = mats.ToArray();
 			goSubTrozo.transform.SetParent (transf);
 			goSubTrozo.transform.localPosition = Vector3.zero;
 		}
@@ -220,8 +293,9 @@ public class GeneradorSubTrozosPieza : MonoBehaviour {
 	/// <returns>The existencia octantes.</returns>
 	/// <param name="vertice">Vertice.</param>
 	bool[] getExistenciaOctantes(Vector3 vertice){
-
+		
 		bool[] existenciaOctantes = new bool[8];
+
 
 		bool dentro_Nx = vertice.x < umbral;
 		bool dentro_Ny = vertice.y < umbral;
@@ -229,7 +303,6 @@ public class GeneradorSubTrozosPieza : MonoBehaviour {
 		bool dentro_Px = vertice.x > -umbral;
 		bool dentro_Py = vertice.y > -umbral;
 		bool dentro_Pz = vertice.z > -umbral;
-
 
 		if (dentro_Px && dentro_Py && dentro_Pz)
 			existenciaOctantes [0] = true;

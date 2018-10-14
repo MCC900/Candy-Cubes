@@ -124,6 +124,9 @@ public class Pieza : MonoBehaviour {
 	}
 
 	void recrearModeloCompleto(){
+		Quaternion quat = Quaternion.Inverse(transform.localRotation);
+		//transform.rotation = Quaternion.identity;
+
 		for (int x = 0; x < grilla.GetLength(0); x++) {
 			for (int y = 0; y < grilla.GetLength(1); y++) {
 				for (int z = 0; z < grilla.GetLength(2); z++) {
@@ -147,5 +150,7 @@ public class Pieza : MonoBehaviour {
 				}
 			}
 		}
+
+		//transform.rotation = quat;
 	}
 }

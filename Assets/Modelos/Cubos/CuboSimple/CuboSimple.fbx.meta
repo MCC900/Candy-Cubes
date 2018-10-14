@@ -22,6 +22,8 @@ ModelImporter:
     100032: DoblezY
     100034: DoblezZ
     100036: Union
+    100038: Camera
+    100040: Sun
     400000: Cubo_EjeY
     400002: Cubo_EjeZ
     400004: Cubo_Esquinas
@@ -41,8 +43,13 @@ ModelImporter:
     400032: DoblezY
     400034: DoblezZ
     400036: Union
+    400038: Camera
+    400040: Sun
+    2000000: Camera
     2100000: No Name
     2100002: Material
+    2100004: Lado
+    2100006: Arriba
     2300000: Cubo_EjeY
     2300002: Cubo_EjeZ
     2300004: Cubo_Esquinas
@@ -97,8 +104,14 @@ ModelImporter:
     4300030: DoblezX
     4300032: DoblezY
     4300034: DoblezZ
+    10800000: Sun
     2186277476908879412: ImportLogs
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: No Name
+    second: {fileID: 2100000, guid: f31ab7b4e0c3ee74d94a90154d303dd2, type: 2}
   materials:
     importMaterials: 1
     materialName: 0
@@ -155,7 +168,7 @@ ModelImporter:
     normalSmoothAngle: 60
     normalImportMode: 0
     tangentImportMode: 0
-    normalCalculationMode: 4
+    normalCalculationMode: 0
   importAnimation: 1
   copyAvatar: 0
   humanDescription:
