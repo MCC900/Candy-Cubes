@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 1102b996cf8c3284cb7cfe8296d5f39f
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - terrenoPasto: {fileID: 1857873620694106, guid: e30baf81e4c7cbc418fe82d2f1b5b87c,
+      type: 2}
+  - carameloRojo: {fileID: 1799078587274102, guid: 7b2aca5637962884fadc452e557138a2,
+      type: 2}
+  - carameloVerde: {fileID: 1045834741045230, guid: 53122139591168944a36df7fee8050de,
+      type: 2}
+  - carameloNaranja: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
