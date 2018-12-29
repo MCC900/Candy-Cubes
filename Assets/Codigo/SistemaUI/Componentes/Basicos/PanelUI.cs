@@ -42,11 +42,13 @@ public class PanelUI : MonoBehaviour, IObjetoRectAutoajustable {
 		actualizarMesh ();
 	}
 
+	#if UNITY_EDITOR
 	void OnValidate(){
 		if(inicializado)
 			actualizarObjetoRectEditor();
 	}
-		
+	#endif
+
 	//---------------------------------------------------
 	//-----------------INICIALIZACIÓN--------------------
 
@@ -77,6 +79,7 @@ public class PanelUI : MonoBehaviour, IObjetoRectAutoajustable {
 		MeshGen.actualizarMesh (this.meshFilter.mesh, true);
 	}
 
+	#if UNITY_EDITOR
 	[ContextMenu("Actualizar Mesh")]
 	public void actualizarObjetoRectEditor(){
 		this.actualizarAsociarComponentes (); //Estamos en el editor, no nos preocupa eficiencia y se cambian/borran componentes constantemente
@@ -96,6 +99,11 @@ public class PanelUI : MonoBehaviour, IObjetoRectAutoajustable {
 		PanelUIManager.getGrupoMateriales (this.material, this.spriteReferencia.border).forzarActualizarMateriales();
 		this.actualizarObjetoRectEditor ();
 	}
+	#else
+
+	public void actualizarObjetoRectEditor(){
+	}
+	#endif
 
 	public void actualizarAsociarComponentes(){
 		this.rectTransform = GetComponent<RectTransform> ();
@@ -259,6 +267,7 @@ public class PanelUI : MonoBehaviour, IObjetoRectAutoajustable {
 		}
 	}
 
+	#if UNITY_EDITOR
 	void generarSubMateriales(){
 		PanelUIGrupoMats pgm = PanelUIManager.getGrupoMateriales (this.material, this.spriteReferencia.border);
 		this.matEsquinas = pgm.matEsquinas;
@@ -273,6 +282,6 @@ public class PanelUI : MonoBehaviour, IObjetoRectAutoajustable {
 		mats [3] = this.matCentro;
 		this.meshRenderer.sharedMaterials = mats;
 	}
-
+	#endif
 	//---------------------------------------------------
 }

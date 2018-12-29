@@ -1,18 +1,82 @@
 ﻿using UnityEngine;
 using System;
+using System.Collections.Generic;
 
 public class MapaNivel : MonoBehaviour {
 
 	//=======VARIABLES PRIVADAS=======
 
-
 	enum TipoMapaNivel {MAPA_2D, MAPA_3D};
 	TipoMapaNivel tipoMapaNivel;
 
+	Vector3Int dimensiones;
+
+	List<Pieza> piezas;
 	//-------------------GENERACION----------------------
 
+	void leerPiezasDesdeHijos_editor(){
+		if (piezas != null) {
+			piezas.Clear ();
+		} else {
+			piezas = new List<Pieza> ();
+		}
+		foreach (Transform thijo in transform) {
+			Pieza pieza = thijo.GetComponent<Pieza> ();
+			if (pieza != null) {
+				piezas.Add (pieza);
+			}
+
+		}
+	}
+
+	void limpiarMapaNivel(){
+		piezas = new List<Pieza> ();
+		foreach (Transform thijo in transform) {
+			Destroy (thijo.gameObject);
+		}
+	}
+
+	void anadirPieza(Pieza.TipoPieza tipoPieza, Vector3Int dimensiones, Array3DBool existencia, Array3DInt metadata){
+		GameObject goPieza = new GameObject ();
+		Pieza pieza = goPieza.AddComponent<Pieza> ();
+		pieza.inicializar (tipoPieza, dimensiones, existencia, metadata);
+		pieza.transform.parent = transform;
+		piezas.Add (pieza);
+	}
+
 	string mapaPrueba = "1/10,10,10/1;3:4:5;010:111:111:101:011:110:100:111:000:010:000:111:000:010:000:111:000:110:101:011";
-	string charsMetadata = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ#$";
+
+	/// <summary>
+	/// Codifica este MapaNivel, sus características y sus piezas (hijos de este GameObject) a un string que lo define exactamente.
+	/// </summary>
+	string codificar(){
+		string charSep_0 = DataJuego.charsSeparadores [0].ToString ();
+		string charSep_1 = DataJuego.charsSeparadores [1].ToString ();
+
+		string str_tipoMapa = ((int)tipoMapaNivel).ToString ();
+
+		string str_largoX = dimensiones.x.ToString();
+		string str_largoY = dimensiones.z.ToString();
+		string str_dimensiones = str_largoX + charSep_1 + str_largoY;
+
+		if (tipoMapaNivel == TipoMapaNivel.MAPA_3D) {
+			string str_largoZ = dimensiones.y.ToString ();
+			str_dimensiones += charSep_1 + str_largoZ;
+		}
+
+		string str_piezas = "";
+		foreach (Pieza pieza in piezas) {
+			string str_pieza = codificarPieza (pieza, tipoMapaNivel);
+			if (str_piezas != "") {
+				str_piezas += charSep_1 + str_pieza;
+			} else {
+				str_piezas += str_pieza;
+			}
+		}
+
+		string str_mapa = str_tipoMapa + charSep_0 + str_dimensiones + charSep_0 + str_piezas;
+		return str_mapa;
+	}
 
 	/// <summary>
 	/// Genera el MapaNivel a partir de su código explícito.
@@ -53,12 +117,14 @@ public class MapaNivel : MonoBehaviour {
 			return false;
 		}
 
+		tipoMapaNivel = tipoMapaNivel_leido;
+
 		string str_dimX = splitDimensiones [0];
 		string str_dimY = splitDimensiones [1];
 
-		int dimX_leido;
-		int dimY_leido;
-		int dimZ_leido;
+		int dimX_leido = 1;
+		int dimY_leido = 1;
+		int dimZ_leido = 1;
 
 		if (!int.TryParse (str_dimX, out dimX_leido)) {
 			logErrorConstruccion ("Dimensión X del mapa no se traduce como un número entero", codigo);
@@ -75,15 +141,17 @@ public class MapaNivel : MonoBehaviour {
 				return false;
 			}
 		}
+		dimensiones = new Vector3Int (dimX_leido, dimZ_leido, dimY_leido);
 
 		//-----PIEZAS (...)-----
 
+		limpiarMapaNivel();
+
 		string str_piezas = split[2];
 		string[] splitPiezas = str_piezas.Split (DataJuego.charsSeparadores [1]);
-		foreach (string pieza in splitPiezas) {
-			string[] datos = pieza.Split (DataJuego.charsSeparadores [2]);
-			if (!decodificarPieza (datos, tipoMapaNivel_leido)) {
-				logErrorConstruccion ("Error al decodificar la pieza a partir del código '" + pieza + "'", codigo);
+		foreach (string str_pieza in splitPiezas) {
+			if (!decodificarPieza (str_pieza, tipoMapaNivel_leido)) {
+				logErrorConstruccion ("Error al decodificar la pieza a partir del código '" + str_pieza + "'", codigo);
 				return false;
 			}
 		}
@@ -91,7 +159,71 @@ public class MapaNivel : MonoBehaviour {
 		return false;	
 	}
 
-	bool decodificarPieza(string[] datosPieza, TipoMapaNivel tipoMapa){
+	/// <summary>
+	/// Codifica una pieza a un string que la define exactamente, y que puede ser decodificado posteriormente.
+	/// </summary>
+	/// <returns>El código de la pieza (string)</returns>
+	/// <param name="pieza">La pieza</param>
+	/// <param name="tipoMapa">El tipo de mapa (2D o 3D)</param>
+	string codificarPieza(Pieza pieza, TipoMapaNivel tipoMapa){
+		string charSep_2 = DataJuego.charsSeparadores [2].ToString();
+		string charSep_3 = DataJuego.charsSeparadores [3].ToString();
+
+		string str_tipoPieza = ((int)(pieza.tipoPieza)).ToString ();
+		string str_largoX = pieza.dimensiones.x.ToString();
+		string str_largoY = pieza.dimensiones.z.ToString();
+
+		string str_dimensiones = str_largoX + charSep_3 + str_largoY;
+
+		if (tipoMapa == TipoMapaNivel.MAPA_3D) {
+			string str_largoZ = pieza.dimensiones.y.ToString();
+			str_dimensiones += charSep_3 + str_largoZ;
+		}
+
+		string str_existencia = "";
+		for (int z = 0; z < pieza.dimensiones.y; z++) {
+			for (int y = 0; y < pieza.dimensiones.z; y++) {
+				string fila = "";
+				for (int x = 0; x < pieza.dimensiones.x; x++) {
+					fila += pieza.existencia [x, z, y] ? "1" : "0";
+				}
+				str_existencia += fila;
+				str_existencia += charSep_3;
+			}
+		}
+
+		str_existencia = str_existencia.Substring (0, str_existencia.Length - 1);
+
+		string str_metadata = "";
+		if (!pieza.metadata.esNull()) {
+			for (int z = 0; z < pieza.dimensiones.y; z++) {
+				for (int y = 0; y < pieza.dimensiones.z; y++) {
+					string fila = "";
+					for (int x = 0; x < pieza.dimensiones.x; x++) {
+						int metadata = pieza.metadata [x, z, y];
+						fila += DataJuego.charsMetadata[metadata];
+					}
+					str_metadata += fila;
+					str_metadata += charSep_3;
+				}
+			}
+			str_metadata = str_metadata.Substring (0, str_metadata.Length - 1);
+		}
+
+		string str_pieza = str_tipoPieza + charSep_2 + str_dimensiones + charSep_2 + str_existencia;
+		if (str_metadata != "") {
+			str_pieza += charSep_2 + str_metadata;
+		}
+		return str_pieza;
+	}
+
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <returns><c>true</c>, si la pieza se decodificó y asoció como hijo a este MapaNivel correctamente, <c>false</c> de otro modo.</returns>
+	/// <param name="str_pieza">La cadena codificada de la cual se leerá la pieza (string).</param>
+	/// <param name="tipoMapa">El tipo de mapa (2D o 3D).</param>
+	bool decodificarPieza(string str_pieza, TipoMapaNivel tipoMapa){
 		//	EN ESTA EXPLICACIÓN, SE ASUME QUE DataJuego.charsSeparadores =  "/,;:"
 		//
 		//	Formato del código de una pieza:
@@ -112,11 +244,13 @@ public class MapaNivel : MonoBehaviour {
 		//  
 
 
+		string[] datosPieza = str_pieza.Split (DataJuego.charsSeparadores [2]);
 		//---VERIFICACIÓN DATOS VACÍO---
 		if (datosPieza.Length == 0) {
 			logErrorPieza ("Array datosPieza vacío");
 			return false;
 		}
+
 
 		//---TIPO PIEZA---
 		string str_tipoPieza = datosPieza [0];
@@ -187,7 +321,7 @@ public class MapaNivel : MonoBehaviour {
 			logErrorPieza ("La cantidad de filas de la pieza no se corresponde con las dimensiones especificadas anteriormente (X:"+largoX_leido+", Y:"+largoY_leido+", Z:"+largoZ_leido+")");
 			return false;
 		}
-		bool[,,] existencia_leido = new bool[largoX_leido, largoZ_leido, largoY_leido];
+		Array3DBool existencia_leido = new Array3DBool(largoX_leido, largoZ_leido, largoY_leido);
 			
 		int i = 0;
 		for (int z = 0; z < largoZ_leido; z++) {
@@ -206,7 +340,7 @@ public class MapaNivel : MonoBehaviour {
 		}
 
 
-		int[,,] metadata_leido = null;
+		Array3DInt metadata_leido = new Array3DInt();
 
 		//---LEER METADATA---
 		if (tieneMetadata) {
@@ -218,7 +352,7 @@ public class MapaNivel : MonoBehaviour {
 				return false;
 			}
 
-			metadata_leido = new int[largoX_leido, largoZ_leido, largoY_leido];
+			metadata_leido = new Array3DInt(largoX_leido, largoZ_leido, largoY_leido);
 
 			i = 0;
 			for (int z = 0; z < largoZ_leido; z++) {
@@ -246,11 +380,13 @@ public class MapaNivel : MonoBehaviour {
 			}
 		}
 
-		GameObject goPieza = new GameObject ();
-		Pieza nuevaPieza = goPieza.AddComponent<Pieza> ();
-		goPieza.transform.parent = transform;
-		nuevaPieza.inicializar (tipoPieza_leido, new Vector3Int (largoX_leido, largoY_leido, largoZ_leido), existencia_leido, metadata_leido);
-
+		/*
+			GameObject goPieza = new GameObject ();
+			Pieza nuevaPieza = goPieza.AddComponent<Pieza> ();
+			nuevaPieza.inicializar (tipoPieza_leido, new Vector3Int (largoX_leido, largoY_leido, largoZ_leido), existencia_leido, metadata_leido);
+			anadirPieza (nuevaPieza);
+		*/
+		anadirPieza (tipoPieza_leido, new Vector3Int (largoX_leido, largoY_leido, largoZ_leido), existencia_leido, metadata_leido);
 		return true;
 	}
 
@@ -295,7 +431,18 @@ public class MapaNivel : MonoBehaviour {
 	void prueba2(){
 		generarDesdeCodigo (mapaPrueba);
 	}
-	
+
+	[ContextMenu("Prueba 3")]
+	void prueba3(){
+		Debug.Log(this.codificarPieza(transform.GetComponentInChildren<Pieza>(), TipoMapaNivel.MAPA_3D));
+	}
+
+	[ContextMenu("Prueba 4")]
+	void prueba4(){
+		Debug.Log ("OLA K ASE WAPO");
+		leerPiezasDesdeHijos_editor();
+		Debug.Log(this.codificar());
+	}
 
 	//---------------------------------------------------
 }

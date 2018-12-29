@@ -1,7 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
+#if UNITY_EDITOR
 using UnityEditor.Animations;
+#endif
 
 public class RecuadroInterfaz : MonoBehaviour {
 
@@ -33,42 +36,56 @@ public class RecuadroInterfaz : MonoBehaviour {
 		actualizarAsociarComponentes ();
 		actualizarTamanoRecuadro ();
 	}
-
+		
 	[ExecuteInEditMode]
 	void Update(){
+		#if UNITY_EDITOR
 		if (!UnityEditor.EditorApplication.isPlaying) {
 			//EDITOR
-			if (Screen.width != anchoPrev || Screen.height != altoPrev) {
-				anchoPrev = Screen.width;
-				altoPrev = Screen.height;
-				actualizarTamanoRecuadro ();
-			}
+			updateEditor();
 		} else {
 			//JUEGO
-			switch (estado) {
-			case EstadoRecuadro.DESACTIVADO:
-				//No hacemos nada
-			case EstadoRecuadro.QUIETO:
-				//No hacemos nada
-				break;
-			case EstadoRecuadro.ENTRANDO:
-			case EstadoRecuadro.SALIENDO:
-				float tiempoAnim = Time.realtimeSinceStartup - momentoInicioAnim;
-				if (tiempoAnim >= segundosDuracionAnim) {
-					setPosicionAnim (segundosDuracionAnim);
-					if (estado == EstadoRecuadro.ENTRANDO) {
-						estado = EstadoRecuadro.QUIETO;
-					} else {
-						estado = EstadoRecuadro.FUERA;
-					}
+			updateJuego();
+		}
+		#else
+			updateJuego();
+		#endif
+	}
+
+	#if UNITY_EDITOR
+	void updateEditor(){
+		if (Screen.width != anchoPrev || Screen.height != altoPrev) {
+			anchoPrev = Screen.width;
+			altoPrev = Screen.height;
+			actualizarTamanoRecuadro ();
+		}
+	}
+	#endif
+
+	void updateJuego(){
+		switch (estado) {
+		case EstadoRecuadro.DESACTIVADO:
+			//No hacemos nada
+		case EstadoRecuadro.QUIETO:
+			//No hacemos nada
+			break;
+		case EstadoRecuadro.ENTRANDO:
+		case EstadoRecuadro.SALIENDO:
+			float tiempoAnim = Time.realtimeSinceStartup - momentoInicioAnim;
+			if (tiempoAnim >= segundosDuracionAnim) {
+				setPosicionAnim (segundosDuracionAnim);
+				if (estado == EstadoRecuadro.ENTRANDO) {
+					estado = EstadoRecuadro.QUIETO;
 				} else {
-					setPosicionAnim (tiempoAnim);
+					estado = EstadoRecuadro.FUERA;
 				}
-				break;
-			case EstadoRecuadro.FUERA:
-				gameObject.SetActive (false);
-				break;
+			} else {
+				setPosicionAnim (tiempoAnim);
 			}
+			break;
+		case EstadoRecuadro.FUERA:
+			gameObject.SetActive (false);
+			break;
 		}
 	}
 	//----------------------------------------------------

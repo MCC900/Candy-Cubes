@@ -18,11 +18,11 @@ public class Pieza : MonoBehaviour {
 	public Vector3Int dimensiones;
 	public Vector3Int posicion;
 
-	public bool[,,] existencia; //Matriz que contiene la existencia de la pieza. grilla[x,y,z] es verdadero si la pieza contiene un trozo en esas coordenadas (locales)
-	public int[,,] metadata; //Matriz que contiene la metadata de la pieza. Debería ser siempre del mismo tamaño que grilla.
+	public Array3DBool existencia; //Matriz que contiene la existencia de la pieza. grilla[x,y,z] es verdadero si la pieza contiene un trozo en esas coordenadas (locales)
+	public Array3DInt metadata; //Matriz que contiene la metadata de la pieza. Debería ser siempre del mismo tamaño que grilla.
 
-	bool[,,] existencia_pad; //Contiene una versión paddeada con falses de la variable grilla
-	int[,,] metadata_pad; //Contiene una versión paddeada con 0s de la variable metadata
+	[SerializeField] Array3DBool existencia_pad; //Contiene una versión paddeada con falses de la variable grilla
+	[SerializeField] Array3DInt metadata_pad; //Contiene una versión paddeada con 0s de la variable metadata
 
 	//=======GENERACIÓN=======
 	[ContextMenu("Generar")]
@@ -62,9 +62,12 @@ public class Pieza : MonoBehaviour {
 		int largoX = maxX - minX + 1;
 		int largoY = maxY - minY + 1;
 		int largoZ = maxZ - minZ + 1;
-
-		existencia = new bool[largoX, largoY, largoZ];
-		metadata = new int[largoX, largoY, largoZ];
+		dimensiones = new Vector3Int (largoX, largoY, largoZ);
+		existencia = new Array3DBool(largoX, largoY, largoZ);
+		metadata = new Array3DInt ();
+		if (DataJuego.cantidadEstadosTipoPieza (tipoPieza) != 1) {
+			metadata = new Array3DInt(largoX, largoY, largoZ);
+		}
 
 		for (int i = 0; i < transform.childCount; i++) {
 			hijo = transform.GetChild (i);
@@ -94,8 +97,8 @@ public class Pieza : MonoBehaviour {
 
 		DataJuego.i.cargarDataMuestrarios ();
 
-		existencia = new bool[tamPruebaX, tamPruebaY, tamPruebaZ];
-		metadata = new int[tamPruebaX, tamPruebaY, tamPruebaZ];
+		existencia = new Array3DBool(tamPruebaX, tamPruebaY, tamPruebaZ);
+		metadata = new Array3DInt(tamPruebaX, tamPruebaY, tamPruebaZ);
 
 		for (int x = 0; x < tamPruebaX; x++) {
 			for (int y = 0; y < tamPruebaY; y++) {
@@ -111,15 +114,16 @@ public class Pieza : MonoBehaviour {
 	}
 
 	void generarPadding(){
-		existencia_pad = new bool[existencia.GetLength (0) + 2, existencia.GetLength (1) + 2, existencia.GetLength (2) + 2];
-		if (metadata != null) {
-			metadata_pad = new int[metadata.GetLength (0) + 2, metadata.GetLength (1) + 2, metadata.GetLength (2) + 2];
+		existencia_pad = new Array3DBool(existencia.largoX + 2, existencia.largoY + 2, existencia.largoZ + 2);
+		metadata_pad = new Array3DInt ();
+		if (!metadata.esNull()) {
+			metadata_pad = new Array3DInt(metadata.largoX + 2, metadata.largoY + 2, metadata.largoZ + 2);
 		}
-		for (int x = 0; x < existencia.GetLength (0); x++) {
-			for (int y = 0; y < existencia.GetLength (1); y++) {
-				for (int z = 0; z < existencia.GetLength (2); z++) {
+		for (int x = 0; x < existencia.largoX; x++) {
+			for (int y = 0; y < existencia.largoY; y++) {
+				for (int z = 0; z < existencia.largoZ; z++) {
 					existencia_pad [x + 1, y + 1, z + 1] = existencia [x, y, z];
-					if (metadata != null) {
+					if (!metadata.esNull()) {
 						metadata_pad [x + 1, y + 1, z + 1] = metadata [x, y, z];
 					}
 				}
@@ -130,9 +134,9 @@ public class Pieza : MonoBehaviour {
 		//Quaternion quat = Quaternion.Inverse(transform.localRotation);
 		//transform.rotation = Quaternion.identity;
 
-		for (int x = 0; x < existencia.GetLength(0); x++) {
-			for (int y = 0; y < existencia.GetLength(1); y++) {
-				for (int z = 0; z < existencia.GetLength(2); z++) {
+		for (int x = 0; x < existencia.largoX; x++) {
+			for (int y = 0; y < existencia.largoY; y++) {
+				for (int z = 0; z < existencia.largoZ; z++) {
 					if (existencia [x, y, z]) {
 
 						bool[,,] mapaVecindad = new bool[3, 3, 3];
@@ -147,7 +151,7 @@ public class Pieza : MonoBehaviour {
 
 						TrozoPieza tp = go.AddComponent<TrozoPieza> ();
 						int metadata_leido;
-						if (metadata != null) {
+						if (!metadata.esNull()) {
 							metadata_leido = metadata_pad [x + 1, y + 1, z + 1];
 						} else {
 							metadata_leido = 0;
@@ -165,7 +169,7 @@ public class Pieza : MonoBehaviour {
 		//transform.rotation = quat;
 	}
 
-	public void inicializar(TipoPieza tipoPieza, Vector3Int dimensiones, bool[,,] existencia, int[,,] metadata){
+	public void inicializar(TipoPieza tipoPieza, Vector3Int dimensiones, Array3DBool existencia, Array3DInt metadata){
 		DataJuego.i.cargarDataMuestrarios ();
 
 		this.tipoPieza = tipoPieza;
@@ -174,9 +178,5 @@ public class Pieza : MonoBehaviour {
 		this.metadata = metadata;
 		generarPadding ();
 		recrearModeloCompleto ();
-	}
-
-	void Start(){
-		generar ();
 	}
 }
