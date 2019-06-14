@@ -25,6 +25,34 @@ public class Pieza : MonoBehaviour {
 	[SerializeField] Array3DInt metadata_pad; //Contiene una versión paddeada con 0s de la variable metadata
 
 	//=======GENERACIÓN=======
+	[ContextMenu("Generar prueba terreno")]
+	void pruebaTerreno(){
+		limpiar ();
+		for(int x = 0; x < this.metadata.largoX; x++){
+			for (int y = 0; y < this.metadata.largoY; y++) {
+				for (int z = 0; z < this.metadata.largoZ; z++) {
+					if (this.existencia [x, y, z]) {
+						if ((y < this.metadata.largoY - 2 &&
+							(!this.existencia [x, y + 2, z] && this.existencia [x, y + 1, z])) ||
+							((y == this.metadata.largoY - 2) && this.existencia[x,y+1,z])) {
+							this.metadata [x, y, z] = 1;
+						} else if(y < this.metadata.largoY - 2 && (this.existencia[x,y+2,z] && this.existencia[x,y+1,z])){
+							this.metadata [x, y, z] = 2;
+						}
+					}
+				}
+			}
+		}
+		this.generarPadding ();
+
+		recrearModeloCompleto ();
+		//this.actualizarSegunMetadata ();
+	}
+
+	void actualizarSegunMetadata(){
+		
+	}
+
 	[ContextMenu("Generar")]
 	void generar(){
 		DataJuego.i.cargarDataMuestrarios ();
@@ -157,7 +185,6 @@ public class Pieza : MonoBehaviour {
 							metadata_leido = 0;
 						}
 						tp.generarTrozoPieza (mapaVecindad, metadata_leido, tipoPieza);
-						PintadorTrozos.pintarTrozo (tp, tipoPieza, mapaVecindad, metadata_leido);
 
 						go.transform.parent = transform;
 						go.transform.localPosition = new Vector3 (x, y, z);

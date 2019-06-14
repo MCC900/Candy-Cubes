@@ -1,0 +1,51 @@
+﻿Shader "Mariano/CieloCambiante"
+{
+    Properties
+    {
+        _Cube ("Environment Map", Cube) = "" {}
+    }
+    SubShader
+    {
+        Tags { "Queue"="Background" }
+        LOD 100
+
+        Pass
+        {
+            CGPROGRAM
+            #pragma vertex vert
+            #pragma fragment frag
+            // make fog work
+            #pragma multi_compile_fog
+			
+			uniform samplerCUBE _Cube;
+
+            struct vertexInput
+            {
+                float4 vertex : POSITION;
+            };
+
+            struct vertexOutput
+            {
+                float4 pos : SV_POSITION;
+				float3 viewDir : TEXCOORD1;
+            };
+
+
+            vertexOutput vert (vertexInput v)
+            {
+                vertexOutput o;
+				float4x4 modelMatrix = unity_ObjectToWorld;
+
+                o.viewDir = mul(modelMatrix, v.vertex).xyz - _WorldSpaceCameraPos;
+                o.pos = mul(modelMatrix, v.vertex);
+				return o;
+            }
+
+            fixed4 frag (vertexOutput vo) : COLOR
+            {
+                return texCUBE(_Cube, vo.viewDir);
+            }
+            ENDCG
+        }
+    }
+}

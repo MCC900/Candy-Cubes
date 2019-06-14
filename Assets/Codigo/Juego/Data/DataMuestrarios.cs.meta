@@ -1,0 +1,22 @@
+fileFormatVersion: 2
+guid: 1102b996cf8c3284cb7cfe8296d5f39f
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - terrenoPasto_0: {fileID: 7872028310002107480, guid: ce2ada0fada2095488f5d00a40a5dea0,
+      type: 3}
+  - terrenoPasto_1: {fileID: 2677013078368792849, guid: 9d47995d943bc214f9137d4fc6d2ac16,
+      type: 3}
+  - terrenoPasto_2: {instanceID: 0}
+  - carameloRojo: {fileID: 1799078587274102, guid: 7b2aca5637962884fadc452e557138a2,
+      type: 3}
+  - carameloVerde: {fileID: 1045834741045230, guid: 53122139591168944a36df7fee8050de,
+      type: 3}
+  - carameloNaranja: {instanceID: 0}
+  - materialTierra: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

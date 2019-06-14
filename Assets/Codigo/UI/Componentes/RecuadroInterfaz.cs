@@ -12,10 +12,11 @@ public class RecuadroInterfaz : MonoBehaviour {
 	float segundosDuracionAnim = 0.65F;
 	EasingFunction.Ease easing = EasingFunction.Ease.EaseOutQuart; //Suavizado de animacion (easing)
 
+	public enum EstadoRecuadro {QUIETO, ENTRANDO, SALIENDO, FUERA, DESACTIVADO};
+	public EstadoRecuadro estado;
+
 
 	//=======VARIABLES PRIVADAS=======
-	enum EstadoRecuadro {QUIETO, ENTRANDO, SALIENDO, FUERA, DESACTIVADO};
-	EstadoRecuadro estado;
 	EasingFunction.Function easingFunc;
 
 	float anchoPrev = 0; //Ancho de la pantalla en el momento anterior
@@ -34,7 +35,7 @@ public class RecuadroInterfaz : MonoBehaviour {
 		collidersHijos = UtilComponentes.getComponentesEnDescendencia<Collider2D>(gameObject).ToArray();
 		easingFunc = EasingFunction.GetEasingFunction (easing);
 		actualizarAsociarComponentes ();
-		actualizarTamanoRecuadro ();
+		//actualizarTamanoRecuadro ();
 	}
 		
 	[ExecuteInEditMode]
@@ -66,6 +67,7 @@ public class RecuadroInterfaz : MonoBehaviour {
 		switch (estado) {
 		case EstadoRecuadro.DESACTIVADO:
 			//No hacemos nada
+			break;
 		case EstadoRecuadro.QUIETO:
 			//No hacemos nada
 			break;
@@ -108,8 +110,8 @@ public class RecuadroInterfaz : MonoBehaviour {
 	//--------------------CONTROL-------------------------
 
 	public void entraRecuadro(){
-		activarInteraccion ();
 		gameObject.SetActive (true);
+		activarInteraccion ();
 		estado = EstadoRecuadro.ENTRANDO;
 		momentoInicioAnim = Time.realtimeSinceStartup;
 	}

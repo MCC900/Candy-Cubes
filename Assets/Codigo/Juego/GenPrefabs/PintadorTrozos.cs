@@ -8,19 +8,15 @@ public static class PintadorTrozos
 
 		case Pieza.TipoPieza.TERRENO_PASTO:
 			if (mapaVecindad [1, 2, 1]) { //Tiene vecino superior
-				//Borrar pasto
-				foreach (GameObject subTrozo in trozo.subTrozos) {
-					if (subTrozo != null) {
-						MeshRenderer mr = subTrozo.GetComponent<MeshRenderer> ();
-						Material[] sharedMats = new Material[mr.sharedMaterials.Length];
-						for (int i = 0; i < sharedMats.Length; i++) {
-							sharedMats [i] = DataJuego.i.dataMuestrarios.materialTierra;
-						}
-						mr.sharedMaterials = sharedMats;
-					}
-				}
+				
+			} else {
+				
 			}
 			break;
 		}
+	}
+
+	static bool checker(int x, int y, int z){
+		return ((x % 2) + (y % 2) + (z % 2)) % 2 == 0;
 	}
 }

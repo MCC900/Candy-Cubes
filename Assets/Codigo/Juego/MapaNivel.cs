@@ -4,17 +4,19 @@ using System.Collections.Generic;
 
 public class MapaNivel : MonoBehaviour {
 
-	//=======VARIABLES PRIVADAS=======
+    //=======VARIABLES PRIVADAS=======
 
-	enum TipoMapaNivel {MAPA_2D, MAPA_3D};
-	TipoMapaNivel tipoMapaNivel;
+    public enum TipoMapaNivel {MAPA_2D, MAPA_3D};
+	public TipoMapaNivel tipoMapaNivel;
+    public enum TipoPaisaje {PRADERA, NIEVE}
+    public TipoPaisaje tipoPaisaje;
 
-	Vector3Int dimensiones;
+	public Vector3Int dimensiones;
+	public List<Pieza> piezas;
 
-	List<Pieza> piezas;
-	//-------------------GENERACION----------------------
+    //-------------------GENERACION----------------------
 
-	void leerPiezasDesdeHijos_editor(){
+    void leerPiezasDesdeHijos_editor(){
 		if (piezas != null) {
 			piezas.Clear ();
 		} else {
@@ -41,6 +43,7 @@ public class MapaNivel : MonoBehaviour {
 		Pieza pieza = goPieza.AddComponent<Pieza> ();
 		pieza.inicializar (tipoPieza, dimensiones, existencia, metadata);
 		pieza.transform.parent = transform;
+        pieza.transform.localPosition = Vector3.zero;
 		piezas.Add (pieza);
 	}
 
@@ -83,7 +86,7 @@ public class MapaNivel : MonoBehaviour {
 	/// </summary>
 	/// <returns><c>true</c>, si el código es correcto y se generó el MapaNivel correctamente, <c>false</c> en caso contrario.</returns>
 	/// <param name="codigo">Código explícito del MapaNivel.</param>
-	bool generarDesdeCodigo(string codigo){
+	public bool generarDesdeCodigo(string codigo){
 		//	EN ESTA EXPLICACIÓN, SE ASUME QUE DataJuego.charsSeparadores =  "/,.;:"
 		//
 		//TODO EXPLANEISHON
@@ -91,7 +94,7 @@ public class MapaNivel : MonoBehaviour {
 
 		//descomprimirCodigo (codigo);
 		string[] split = codigo.Split (DataJuego.charsSeparadores[0]);
-		if (split.Length <= 2) {
+		if (split.Length <= 3) {
 			logErrorConstruccion ("No hay suficientes datos separados, sólo hay " + split.Length, codigo);
 			return false;
 		}
@@ -101,14 +104,20 @@ public class MapaNivel : MonoBehaviour {
 		int int_tipoMapaNivel_leido;
 
 		if (!int.TryParse (str_tipoMapaNivel, out int_tipoMapaNivel_leido)) {
-			logErrorConstruccion ("Tipo de MapaNivel sólo puede ser 0 para Mapa_2D o 1 para Mapa_3D", codigo);
+			logErrorConstruccion ("Tipo de MapaNivel sólo puede ser un número entero (0 para Mapa_2D o 1 para Mapa_3D)", codigo);
 			return false;
 		}
-
+        if(!Enum.IsDefined(typeof(TipoMapaNivel), int_tipoMapaNivel_leido))
+        {
+            logErrorConstruccion("Tipo de MapaNivel sólo puede ser 0 para Mapa_2D o 1 para Mapa_3D", codigo);
+            return false;
+        }
 		TipoMapaNivel tipoMapaNivel_leido = (TipoMapaNivel)int_tipoMapaNivel_leido;
+        tipoMapaNivel = tipoMapaNivel_leido;
 
-		//------DIMENSIONES DEL MAPA (x,y,z)------
-		string str_dimensiones = split[1];
+        //------DIMENSIONES DEL MAPA (x,y,z)---
+
+        string str_dimensiones = split[1];
 		string[] splitDimensiones = str_dimensiones.Split (DataJuego.charsSeparadores[1]);
 
 		if ((tipoMapaNivel_leido == TipoMapaNivel.MAPA_2D && splitDimensiones.Length != 2) ||
@@ -117,7 +126,6 @@ public class MapaNivel : MonoBehaviour {
 			return false;
 		}
 
-		tipoMapaNivel = tipoMapaNivel_leido;
 
 		string str_dimX = splitDimensiones [0];
 		string str_dimY = splitDimensiones [1];
@@ -143,11 +151,30 @@ public class MapaNivel : MonoBehaviour {
 		}
 		dimensiones = new Vector3Int (dimX_leido, dimZ_leido, dimY_leido);
 
-		//-----PIEZAS (...)-----
+        //-----TIPO PAISAJE (0, 1, 2...)-----
+        string str_tipoPaisaje = split[2];
+        int int_tipoPaisaje_leido;
 
-		limpiarMapaNivel();
+        if (!int.TryParse(str_tipoPaisaje, out int_tipoPaisaje_leido))
+        {
+            logErrorConstruccion("Tipo de paisaje debe expresarse en forma de número entero", codigo);
+            return false;
+        }
+        if(!Enum.IsDefined(typeof(TipoPaisaje), int_tipoPaisaje_leido))
+        {
+            logErrorConstruccion("Tipo de paisaje debe ser un número entre 0 y "+(Enum.GetValues(typeof(TipoPaisaje)).Length - 1)+" inclusive.", codigo);
+            return false;
+        }
 
-		string str_piezas = split[2];
+        TipoPaisaje tipoPaisaje_leido = (TipoPaisaje)int_tipoPaisaje_leido;
+        tipoPaisaje = tipoPaisaje_leido;
+
+        DataUI.i.empezarCambiarCielo(tipoPaisaje_leido);
+        //-----PIEZAS (...)-----
+
+        limpiarMapaNivel();
+
+		string str_piezas = split[3];
 		string[] splitPiezas = str_piezas.Split (DataJuego.charsSeparadores [1]);
 		foreach (string str_pieza in splitPiezas) {
 			if (!decodificarPieza (str_pieza, tipoMapaNivel_leido)) {
@@ -156,16 +183,39 @@ public class MapaNivel : MonoBehaviour {
 			}
 		}
 
-		return false;	
+		return true;	
 	}
 
-	/// <summary>
-	/// Codifica una pieza a un string que la define exactamente, y que puede ser decodificado posteriormente.
-	/// </summary>
-	/// <returns>El código de la pieza (string)</returns>
-	/// <param name="pieza">La pieza</param>
-	/// <param name="tipoMapa">El tipo de mapa (2D o 3D)</param>
-	string codificarPieza(Pieza pieza, TipoMapaNivel tipoMapa){
+    public void empezarAGenerar(string codigo)
+    {
+        //transform.parent.localScale = Vector3.zero;
+        bool correcto = generarDesdeCodigo(codigo);
+        if (correcto)
+        {
+            transform.localPosition = -((Vector3)dimensiones / 2F)+new Vector3(0.5F, 0.5F, 0.5F);
+            terminaDeGenerar();
+        } else
+        {
+            errorAlGenerar();
+        }
+    }
+
+    void errorAlGenerar()
+    {
+        DataUI.i.errorAlGenerarNivel();
+    }
+    void terminaDeGenerar()
+    {
+        DataUI.i.terminaDeGenerarNivel();
+    }
+
+    /// <summary>
+    /// Codifica una pieza a un string que la define exactamente, y que puede ser decodificado posteriormente.
+    /// </summary>
+    /// <returns>El código de la pieza (string)</returns>
+    /// <param name="pieza">La pieza</param>
+    /// <param name="tipoMapa">El tipo de mapa (2D o 3D)</param>
+    string codificarPieza(Pieza pieza, TipoMapaNivel tipoMapa){
 		string charSep_2 = DataJuego.charsSeparadores [2].ToString();
 		string charSep_3 = DataJuego.charsSeparadores [3].ToString();
 
@@ -273,14 +323,18 @@ public class MapaNivel : MonoBehaviour {
 			if (datosPieza.Length != 4) {
 				logErrorPieza ("DatosPieza provisto no contiene la cantidad de datos correcto (4 para el TipoPieza " + Enum.GetName(typeof(Pieza.TipoPieza), int_tipoPieza) + ")");
 				return false;
-			} else {
-				logErrorPieza ("DatosPieza provisto no contiene la cantidad de datos correcto (3 para el TipoPieza " + Enum.GetName (typeof(Pieza.TipoPieza), int_tipoPieza) + ")");
-				return false;
 			}
-		}
+        } else
+        {
+            if (datosPieza.Length != 3)
+            {
+                logErrorPieza("DatosPieza provisto no contiene la cantidad de datos correcto (3 para el TipoPieza " + Enum.GetName(typeof(Pieza.TipoPieza), int_tipoPieza) + ")");
+                return false;
+            }
+        }
 
-		//---LEER TIPO PIEZA---
-		string str_dimensiones = datosPieza [1];
+        //---LEER TIPO PIEZA---
+        string str_dimensiones = datosPieza [1];
 		string[] splitDimensiones = str_dimensiones.Split (DataJuego.charsSeparadores [3]);
 		if ((tipoMapa == TipoMapaNivel.MAPA_2D && splitDimensiones.Length != 2) ||
 		   (tipoMapa == TipoMapaNivel.MAPA_3D && splitDimensiones.Length != 3)) {
@@ -379,17 +433,9 @@ public class MapaNivel : MonoBehaviour {
 				}
 			}
 		}
-
-		/*
-			GameObject goPieza = new GameObject ();
-			Pieza nuevaPieza = goPieza.AddComponent<Pieza> ();
-			nuevaPieza.inicializar (tipoPieza_leido, new Vector3Int (largoX_leido, largoY_leido, largoZ_leido), existencia_leido, metadata_leido);
-			anadirPieza (nuevaPieza);
-		*/
 		anadirPieza (tipoPieza_leido, new Vector3Int (largoX_leido, largoY_leido, largoZ_leido), existencia_leido, metadata_leido);
 		return true;
 	}
-
 
 	/// <summary>
 	/// Comprime el código literal del MapaNivel y devuelve el resultado.

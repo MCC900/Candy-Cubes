@@ -11,18 +11,8 @@ public static class MuestrarioPiezas
 	}
 
 	public static void cargarMuestrario(Pieza.TipoPieza tipoPieza, int metadata, GameObject prefabMuestrario){
-		switch (tipoPieza) {
-		case Pieza.TipoPieza.TERRENO_PASTO:
-		case Pieza.TipoPieza.CARAMELO_ROJO:
-		case Pieza.TipoPieza.CARAMELO_VERDE:
-			if (muestrarios [(int)tipoPieza] == null) {
-				muestrarios [(int)tipoPieza] = new MuestrarioSubTrozos[1];
-			}
-			break;
-		
-		default:
-			Debug.LogError ("El TipoPieza " + Enum.GetName (typeof(Pieza.TipoPieza), tipoPieza) + " no se considera en la función cargarMuestrario()"); 
-			break;
+		if(muestrarios[(int)tipoPieza] == null){
+			muestrarios[(int)tipoPieza] = new MuestrarioSubTrozos[DataJuego.cantidadEstadosTipoPieza(tipoPieza)];
 		}
 
 		if (muestrarios [(int)tipoPieza] [metadata] == null) {

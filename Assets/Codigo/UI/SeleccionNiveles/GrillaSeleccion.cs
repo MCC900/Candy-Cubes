@@ -7,35 +7,56 @@ using TMPro;
 public class GrillaSeleccion : MonoBehaviour {
 
 	public GameObject botonSelNivel;
-	GameObject[] botonesSelNivel;
+    public int paginaActual;
+
+    GameObject[] botonesSelNivel;
 
 	int maxBotones;
+    int ultimoNivel;
+    int cantPaginas;
+    int cantBotones;
 
-	// Use this for initialization
-	void Start () {
+    // Use this for initialization
+    void Start () {
 		StartCoroutine(corLateStart());
 	}
 	IEnumerator corLateStart(){
 		yield return new WaitForEndOfFrame ();
 		maxBotones = getMaxCantBotones ();
-		generarBotones ();
-		numerarBotones (1);
+        ultimoNivel = DataJuego.i.niveles.Length;
+        cantPaginas = ultimoNivel / maxBotones;
+        if(ultimoNivel % maxBotones != 0)
+        {
+            cantPaginas++;
+        }
+        paginaActual = 0;
+        generarBotones ();
+		numerarBotones ();
 	}
 
 	void generarBotones(){
-		botonesSelNivel = new GameObject[maxBotones];
+        cantBotones = paginaActual + 1 < cantPaginas ? maxBotones : ultimoNivel % maxBotones;
+		botonesSelNivel = new GameObject[cantBotones];
 
 		botonesSelNivel [0] = Instantiate (botonSelNivel, this.transform);
 
-		for (var i = 1; i < maxBotones; i++) {
-			botonesSelNivel[i] = Instantiate (botonesSelNivel[0], this.transform);
+		for (var i = 1; i < cantBotones; i++) {
+            if(i > ultimoNivel){
+                break;
+            } else {
+                botonesSelNivel[i] = Instantiate(botonesSelNivel[0], this.transform);
+            }
 		}
 	}
 
-	void numerarBotones(int numPrimero){
-		for (var i = 0; i < maxBotones; i++) {
+	void numerarBotones(){
+        int numPrimero = paginaActual * maxBotones + 1;
+
+        for (var i = 0; i < cantBotones; i++) {
 			TextMeshPro tmp = botonesSelNivel [i].GetComponentInChildren<TextMeshPro> ();
 			tmp.text = (numPrimero + i).ToString ();
+
+            botonesSelNivel[i].GetComponent<CuadritoSelNivel>().numeroNivel = i;
 		}
 	}
 

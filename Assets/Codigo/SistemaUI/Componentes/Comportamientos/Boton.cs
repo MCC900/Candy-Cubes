@@ -1,18 +1,15 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System;
 using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.Events;
 
 public class Boton : MonoBehaviour {
-
-	//=====PROPIEDADES AJUSTABLES=====
-	public UnityEvent alHacerClick;
-	public UnityEvent alEntrarEnFoco;
-	public UnityEvent alSalirDeFoco;
-	public UnityEvent botonMouseBaja;
-	public UnityEvent botonMouseSube;
-	public UnityEvent botonMouseSubeFuera;
+    
+    //=====PROPIEDADES AJUSTABLES=====
+	protected Action AlHacerClick;
+    protected Action AlEntrarEnFoco;
+    protected Action AlSalirDeFoco;
+    protected Action BotonMouseBaja;
+    protected Action BotonMouseSube;
+    protected Action BotonMouseSubeFuera;
 
 	//=======VARIABLES PRIVADAS=======
 	bool pulsandoMouse;
@@ -26,29 +23,35 @@ public class Boton : MonoBehaviour {
 	}
 
 	void OnMouseEnter(){
-		mouseEncima = true;
-		alEntrarEnFoco.Invoke ();
+        mouseEncima = true;
+        if (AlEntrarEnFoco != null)
+            AlEntrarEnFoco();
 	}
 
 	void OnMouseExit(){
-		alSalirDeFoco.Invoke ();
-		mouseEncima = false;
-		pulsandoMouse = false;
-	}
+        mouseEncima = false;
+        if (AlSalirDeFoco != null)
+            AlSalirDeFoco();
+    }
 
 	void OnMouseDown(){
 		pulsandoMouse = true;
-		botonMouseBaja.Invoke ();
-	}
+        if (BotonMouseBaja != null)
+            BotonMouseBaja();
+    }
 
 	void OnMouseUp(){
-		botonMouseSube.Invoke ();
-		if (pulsandoMouse && mouseEncima) {
-			alHacerClick.Invoke ();
-		} else {
-			botonMouseSubeFuera.Invoke ();
-		}
-	}
+        if (BotonMouseSube != null)
+            BotonMouseSube();
+        if (pulsandoMouse && mouseEncima) {
+            if(AlHacerClick != null)
+                AlHacerClick();
+        } else {
+            if(BotonMouseSubeFuera != null)
+			    BotonMouseSubeFuera();
+        }
+        pulsandoMouse = false;
+    }
 
 	//---------------------------------------------------
 }
