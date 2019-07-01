@@ -4,7 +4,7 @@ using System;
 public class Pieza : MonoBehaviour {
 
 
-	public enum TipoPieza {TERRENO_PASTO, CARAMELO_ROJO, CARAMELO_VERDE, CARAMELO_NARANJA}
+	public enum TipoPieza {TERRENO_PASTO, CARAMELO_ROJO, CARAMELO_VERDE, CARAMELO_NARANJA, CARAMELO_AZUL, CARAMELO_AMARILLO, CARAMELO_VIOLETA, OBJETIVO_ROJO}
 
 	//=======VARIABLES DE PRUEBA=======
 	public GameObject prefabMuestrario;
@@ -196,13 +196,14 @@ public class Pieza : MonoBehaviour {
 		//transform.rotation = quat;
 	}
 
-	public void inicializar(TipoPieza tipoPieza, Vector3Int dimensiones, Array3DBool existencia, Array3DInt metadata){
+	public void inicializar(TipoPieza tipoPieza, Vector3Int dimensiones, Vector3Int posicion, Array3DBool existencia, Array3DInt metadata){
 		DataJuego.i.cargarDataMuestrarios ();
 
 		this.tipoPieza = tipoPieza;
 		this.dimensiones = dimensiones;
 		this.existencia = existencia;
 		this.metadata = metadata;
+        this.posicion = posicion;
 		generarPadding ();
 		recrearModeloCompleto ();
 	}

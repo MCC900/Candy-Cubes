@@ -17,9 +17,9 @@ public class DataJuego : MonoBehaviour {
     public MapaNivel mapaNivelPrincipal;
     
     [NonSerialized][HideInInspector] public string[] niveles = {
-        "1/6,5,2/1/0;6:5:2;111111:111111:111111:111111:111111:111111:100001:100001:100001:111111;000000:000000:000000:000000:000000:000000:000000:000000:000000:000000",
-        "1/3,4,5/0/1;3:4:5;111:111:111:111:111:111:111:111:111:111:000:111:000:111:000:111:000:111:000:111",
-        "1/3,4,5/1/1;3:4:5;111:111:111:111:111:111:111:111:111:111:000:111:000:111:000:111:000:111:000:111"
+        "1/6,5,2/1/0;6:5:2;0:0:0;111111:111111:111111:111111:111111:111111:100001:100001:100001:111111;000000:000000:000000:001100:000000:000000:000000:000000:000000:000000,3;2:2:1;1:1:1;11:10,2;2:2:1;2:1:2;11:10",
+        "1/3,4,5/0/1;3:4:5;0:0:0;111:111:111:111:111:111:111:111:111:111:000:111:000:111:000:111:000:111:000:111",
+        "1/3,4,5/1/1;3:4:5;0:0:0;111:111:111:111:111:111:111:111:111:111:000:111:000:111:000:111:000:111:000:111"
     };
 
     public DataMuestrarios dataMuestrarios;
@@ -58,6 +58,10 @@ public class DataJuego : MonoBehaviour {
 		case Pieza.TipoPieza.CARAMELO_ROJO:
 		case Pieza.TipoPieza.CARAMELO_VERDE:
 		case Pieza.TipoPieza.CARAMELO_NARANJA:
+        case Pieza.TipoPieza.CARAMELO_AZUL:
+        case Pieza.TipoPieza.CARAMELO_AMARILLO:
+        case Pieza.TipoPieza.CARAMELO_VIOLETA:
+        case Pieza.TipoPieza.OBJETIVO_ROJO:
 			return 1; //1 único estado implica que no tiene metadata
 		case Pieza.TipoPieza.TERRENO_PASTO:
 			return 3;
@@ -81,7 +85,6 @@ public class DataJuego : MonoBehaviour {
 			i = gameObject.GetComponent<DataJuego>();
             DataUI.i = i.dataUI;
             DataMuestrarios.i = i.dataMuestrarios;
-            Debug.Log ("Instancia de DataJuego adquirida");
 		}
 	}
 

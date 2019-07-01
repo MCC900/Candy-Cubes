@@ -227,37 +227,55 @@ public class GeneradorSubTrozosPieza : MonoBehaviour {
 		for (int i = 0; i < 8; i++) {
 			List<Material> mats = new List<Material> ();
 
-			Mesh meshSubTrozo = new Mesh ();
-			meshSubTrozo.subMeshCount = modelo.subMeshCount;
-			meshSubTrozo.vertices = vertsOctantes [i].ToArray ();
-			int k = 0;
-			for (int j = 0; j < modelo.subMeshCount; j++) {
-				if (matsOctantes [i, j]) {
-					meshSubTrozo.SetTriangles (trisOctantes [i,j].ToArray(), k);
-					mats.Add (meshrend.sharedMaterials [j]);
-					k++;
-				}
-			}
-			meshSubTrozo.uv = uvsOctantes [i].ToArray ();
-			meshSubTrozo.normals = normsOctantes [i].ToArray ();
-			MeshUtility.Optimize (meshSubTrozo);
+            if(vertsOctantes[i].Count > 0)
+            {
+                Mesh meshSubTrozo = new Mesh();
+                //meshSubTrozo.subMeshCount = modelo.subMeshCount;
+                meshSubTrozo.vertices = vertsOctantes[i].ToArray();
+                int k = 0;
+                for (int j = 0; j < modelo.subMeshCount; j++)
+                {
+                    if (matsOctantes[i, j])
+                    {
+                        mats.Add(meshrend.sharedMaterials[j]);
+                        k++;
+                    }
+                }
+                meshSubTrozo.subMeshCount = mats.Count;
+                k = 0;
+                for (int j = 0; j < modelo.subMeshCount; j++)
+                {
+                    if (matsOctantes[i, j])
+                    {
+                        meshSubTrozo.SetTriangles(trisOctantes[i, j].ToArray(), k);
+                        k++;
+                    }
+                }
 
-			string ruta = AssetDatabase.GetAssetPath (modelo.GetInstanceID ());
-			ruta = ruta.Substring (0, ruta.LastIndexOf ('/')+1) + transf.name;
-			if (!Directory.Exists (ruta)) {
-				Directory.CreateDirectory (ruta);
-			}
-			ruta = ruta + "/" + transf.name + "_" + nombresSubTrozos[i] + ".asset";
-			AssetDatabase.CreateAsset (meshSubTrozo, ruta);
-			GameObject goSubTrozo = new GameObject (transf.name + "_" + nombresSubTrozos [i]);
+                meshSubTrozo.uv = uvsOctantes[i].ToArray();
+                meshSubTrozo.normals = normsOctantes[i].ToArray();
+                MeshUtility.Optimize(meshSubTrozo);
 
-			MeshRenderer mr = goSubTrozo.AddComponent<MeshRenderer> ();
-			MeshFilter mf = goSubTrozo.AddComponent<MeshFilter> ();
-			mf.sharedMesh = meshSubTrozo;
+                string ruta = AssetDatabase.GetAssetPath(modelo.GetInstanceID());
+                ruta = ruta.Substring(0, ruta.LastIndexOf('/') + 1) + transf.name;
+                if (!Directory.Exists(ruta))
+                {
+                    Directory.CreateDirectory(ruta);
+                }
+                ruta = ruta + "/" + transf.name + "_" + nombresSubTrozos[i] + ".asset";
+                AssetDatabase.CreateAsset(meshSubTrozo, ruta);
+                GameObject goSubTrozo = new GameObject(transf.name + "_" + nombresSubTrozos[i]);
 
-			mr.sharedMaterials = mats.ToArray();
-			goSubTrozo.transform.SetParent (transf);
-			goSubTrozo.transform.localPosition = Vector3.zero;
+                MeshRenderer mr = goSubTrozo.AddComponent<MeshRenderer>();
+                MeshFilter mf = goSubTrozo.AddComponent<MeshFilter>();
+                mf.sharedMesh = meshSubTrozo;
+
+                mr.sharedMaterials = mats.ToArray();
+                goSubTrozo.transform.SetParent(transf);
+                goSubTrozo.transform.localPosition = Vector3.zero;
+            }
+
+			
 		}
 	}
 
@@ -266,6 +284,7 @@ public class GeneradorSubTrozosPieza : MonoBehaviour {
 	/// </summary>
 	/// <param name="transf">Transform que contendrá a los 8 subTrozos como hijos.</param>
 	void recargarCasoTrozo(Transform transf){
+        /*
 		Mesh modelo = transf.GetComponent<MeshFilter> ().sharedMesh;
 
 		for (int i = 0; i < 8; i++) {
@@ -276,21 +295,111 @@ public class GeneradorSubTrozosPieza : MonoBehaviour {
 			}
 			ruta = ruta + "/" + transf.name + "_" + nombresSubTrozos[i] + ".asset";
 			Mesh meshSubTrozo = AssetDatabase.LoadAssetAtPath<Mesh> (ruta);
-			GameObject goSubTrozo = new GameObject (transf.name + "_" + nombresSubTrozos [i]);
+
+            GameObject goSubTrozo = new GameObject (transf.name + "_" + nombresSubTrozos [i]);
 
 			MeshRenderer mr = goSubTrozo.AddComponent<MeshRenderer> ();
 			MeshFilter mf = goSubTrozo.AddComponent<MeshFilter> ();
 			mf.sharedMesh = meshSubTrozo;
+            mr.sharedMaterials = transf.GetComponent<MeshRenderer>().sharedMaterials;
 
-			mr.sharedMaterial = transf.GetComponent<MeshRenderer> ().sharedMaterial;
+           //mr.sharedMaterial = transf.GetComponent<MeshRenderer> ().sharedMaterial;
+
 			goSubTrozo.transform.SetParent (transf);
 			goSubTrozo.transform.localPosition = Vector3.zero;
 		}
-	}
+        */
+        Mesh modelo = transf.GetComponent<MeshFilter>().sharedMesh;
+
+        List<Vector3>[] vertsOctantes = new List<Vector3>[8];
+        List<int>[,] trisOctantes = new List<int>[8, modelo.subMeshCount];
+        bool[,] matsOctantes = new bool[8, modelo.subMeshCount];
+
+        for (int i = 0; i < 8; i++)
+        {
+            vertsOctantes[i] = new List<Vector3>();
+            for (int j = 0; j < modelo.subMeshCount; j++)
+            {
+                trisOctantes[i, j] = new List<int>();
+            }
+        }
+        
+        Vector3[] verts = modelo.vertices;
+        for (int i = 0; i < modelo.subMeshCount; i++)
+        {
+            int[] tris = modelo.GetTriangles(i);
+
+            for (int j = 0; j < tris.Length; j += 3)
+            {
+                int indV1 = tris[j];
+                int indV2 = tris[j + 1];
+                int indV3 = tris[j + 2];
+                Vector3 v1 = verts[indV1];
+                Vector3 v2 = verts[indV2];
+                Vector3 v3 = verts[indV3];
+                bool[] octantesV1 = getExistenciaOctantes(v1);
+                bool[] octantesV2 = getExistenciaOctantes(v2);
+                bool[] octantesV3 = getExistenciaOctantes(v3);
+
+                for (int k = 0; k < 8; k++)
+                {
+                    if (octantesV1[k] && octantesV2[k] && octantesV3[k])
+                    { //Los 3 vértices existen en el mismo octante
+                        matsOctantes[k, i] = true;
+                    }
+                }
+            }
+        }
+
+        int[] cantMatsOctantes = new int[8];
+        for(int i = 0; i < 8; i++)
+        {
+            for(int j = 0; j < modelo.subMeshCount; j++)
+            {
+                if (matsOctantes[i, j])
+                {
+                    cantMatsOctantes[i]++;
+                }
+            }
+        }
+
+        for (int i = 0; i < 8; i++)
+        {
+            string ruta = AssetDatabase.GetAssetPath(modelo.GetInstanceID());
+            ruta = ruta.Substring(0, ruta.LastIndexOf('/') + 1) + transf.name;
+            if (!Directory.Exists(ruta))
+            {
+                Directory.CreateDirectory(ruta);
+            }
+            ruta = ruta + "/" + transf.name + "_" + nombresSubTrozos[i] + ".asset";
+            Mesh meshSubTrozo = AssetDatabase.LoadAssetAtPath<Mesh>(ruta);
+
+            GameObject goSubTrozo = new GameObject(transf.name + "_" + nombresSubTrozos[i]);
+
+            MeshRenderer mr = goSubTrozo.AddComponent<MeshRenderer>();
+            MeshFilter mf = goSubTrozo.AddComponent<MeshFilter>();
+            mf.sharedMesh = meshSubTrozo;
+
+            Material[] matsTrozo = transf.GetComponent<MeshRenderer>().sharedMaterials;
+            List<Material> matsSubTrozo = new List<Material>();
+            for(int j = 0; j < modelo.subMeshCount; j++)
+            {
+                if (matsOctantes[i, j])
+                {
+                    matsSubTrozo.Add(matsTrozo[j]);
+                }
+            }
+            mr.materials = matsSubTrozo.ToArray();
+
+            goSubTrozo.transform.SetParent(transf);
+            goSubTrozo.transform.localPosition = Vector3.zero;
+        }
+
+    }
 
 	/// <summary>
 	/// Devuelve un array con 8 booleanos indicando que a que octantes "pertenece" el vértice.
-	/// Nótese que un v;értice puede "estar" en m;ás de un octante si se encuentra en la frontera entre dos o más,
+	/// Nótese que un vértice puede "estar" en más de un octante si se encuentra en la frontera entre dos o más,
 	/// según la precisión indicada por el atributo "umbral" de este script.
 	/// </summary>
 	/// <returns>The existencia octantes.</returns>

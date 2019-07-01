@@ -27,7 +27,7 @@ public static class MuestrarioPiezas
 
 		for (int i = 0; i < prefabMuestrario.transform.childCount; i++) {
 			Transform hijo = prefabMuestrario.transform.GetChild (i);
-			GameObject[] subSubTrozos = new GameObject[hijo.childCount];
+			GameObject[] subSubTrozos = new GameObject[nombresSubTrozos.Length];
 			for (int j = 0; j < hijo.childCount; j++) {
 				//subSubTrozos [j] = hijo.GetChild (j).gameObject;
 				GameObject subSubTrozo = hijo.GetChild(j).gameObject;

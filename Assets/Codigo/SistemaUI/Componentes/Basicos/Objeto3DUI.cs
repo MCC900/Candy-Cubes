@@ -53,9 +53,13 @@ public class Objeto3DUI : MonoBehaviour, IObjetoRectAutoajustable {
 		float ancho = this.rtPadre.rect.width;
 		float alto = this.rtPadre.rect.height;
 
-		float meshTamanoX = this.meshFilter.sharedMesh.bounds.extents.x * 2;
-		float meshTamanoY = this.meshFilter.sharedMesh.bounds.extents.y * 2;
-		float meshTamanoZ = this.meshFilter.sharedMesh.bounds.extents.z * 2;
+        float meshTamanoX = 1, meshTamanoY = 1, meshTamanoZ = 1;
+        if (this.meshFilter != null)
+        {
+            meshTamanoX  = this.meshFilter.sharedMesh.bounds.extents.x * 2;
+            meshTamanoY = this.meshFilter.sharedMesh.bounds.extents.y * 2;
+            meshTamanoZ = this.meshFilter.sharedMesh.bounds.extents.z * 2;
+        }
 
 		Vector3 escala;
 		if (!this.mantenerProporcion) {
@@ -66,8 +70,8 @@ public class Objeto3DUI : MonoBehaviour, IObjetoRectAutoajustable {
 			float coef = Mathf.Min (coefx, coefy);
 			escala = new Vector3 (coef * this.escalaRelativa.x, coef * this.escalaRelativa.y, coef * this.escalaRelativa.z);
 			//this.rectTransform.localPosition = Vector3.zero;
-			this.rectTransform.SetSizeWithCurrentAnchors (RectTransform.Axis.Horizontal, meshTamanoX);
-			this.rectTransform.SetSizeWithCurrentAnchors (RectTransform.Axis.Vertical, meshTamanoY);
+			//this.rectTransform.SetSizeWithCurrentAnchors (RectTransform.Axis.Horizontal, meshTamanoX);
+			//this.rectTransform.SetSizeWithCurrentAnchors (RectTransform.Axis.Vertical, meshTamanoY);
 
 		}
 

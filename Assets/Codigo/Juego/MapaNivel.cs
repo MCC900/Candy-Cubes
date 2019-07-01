@@ -38,12 +38,12 @@ public class MapaNivel : MonoBehaviour {
 		}
 	}
 
-	void anadirPieza(Pieza.TipoPieza tipoPieza, Vector3Int dimensiones, Array3DBool existencia, Array3DInt metadata){
+	void anadirPieza(Pieza.TipoPieza tipoPieza, Vector3Int dimensiones, Vector3Int posicion, Array3DBool existencia, Array3DInt metadata){
 		GameObject goPieza = new GameObject ();
 		Pieza pieza = goPieza.AddComponent<Pieza> ();
-		pieza.inicializar (tipoPieza, dimensiones, existencia, metadata);
+		pieza.inicializar (tipoPieza, dimensiones, posicion, existencia, metadata);
 		pieza.transform.parent = transform;
-        pieza.transform.localPosition = Vector3.zero;
+        pieza.transform.localPosition = posicion;
 		piezas.Add (pieza);
 	}
 
@@ -277,11 +277,14 @@ public class MapaNivel : MonoBehaviour {
 		//	EN ESTA EXPLICACIÓN, SE ASUME QUE DataJuego.charsSeparadores =  "/,;:"
 		//
 		//	Formato del código de una pieza:
-		//	[tipoPieza;dimensiones;existencia;(opcional)metadata]
+		//	[tipoPieza;dimensiones;posicion;existencia;(opcional)metadata]
 		//
 		// dimensiones: largoX:largoY         (si tipoMapa es 2D)
 		// dimensiones: largoX:largoY:largoZ  (si tipoMapa es 3D)
 		//
+        // posicion: x:y    (si tipoMapa es 2D)
+        // posicion: x:y:z  (si tipoMapa es 3D)
+        //
 		// existencia: fila1:fila2:fila3:...:filaN
 		// fila de existencia (ejemplo): 100011011011111 (caracteres 0 y 1)
 		//
@@ -292,8 +295,7 @@ public class MapaNivel : MonoBehaviour {
 		//                   >   0b983a354bab401293810112b  > utiliza los primeros 12 caracteres (0,1,2,3,4,5,6,7,8,9,a,b) para una pieza con 12 estados posibles por celda
 		//                   >  etc.
 		//  
-
-
+        
 		string[] datosPieza = str_pieza.Split (DataJuego.charsSeparadores [2]);
 		//---VERIFICACIÓN DATOS VACÍO---
 		if (datosPieza.Length == 0) {
@@ -320,20 +322,20 @@ public class MapaNivel : MonoBehaviour {
 		bool tieneMetadata = cantidadEstados != 1;
 
 		if(tieneMetadata){
-			if (datosPieza.Length != 4) {
+			if (datosPieza.Length != 5) {
 				logErrorPieza ("DatosPieza provisto no contiene la cantidad de datos correcto (4 para el TipoPieza " + Enum.GetName(typeof(Pieza.TipoPieza), int_tipoPieza) + ")");
 				return false;
 			}
         } else
         {
-            if (datosPieza.Length != 3)
+            if (datosPieza.Length != 4)
             {
                 logErrorPieza("DatosPieza provisto no contiene la cantidad de datos correcto (3 para el TipoPieza " + Enum.GetName(typeof(Pieza.TipoPieza), int_tipoPieza) + ")");
                 return false;
             }
         }
-
-        //---LEER TIPO PIEZA---
+        
+		//---LEER DIMENSIONES---
         string str_dimensiones = datosPieza [1];
 		string[] splitDimensiones = str_dimensiones.Split (DataJuego.charsSeparadores [3]);
 		if ((tipoMapa == TipoMapaNivel.MAPA_2D && splitDimensiones.Length != 2) ||
@@ -342,7 +344,6 @@ public class MapaNivel : MonoBehaviour {
 			return false;
 		}
 
-		//---LEER DIMENSIONES---
 		string str_largoX = splitDimensiones [0];
 		string str_largoY = splitDimensiones [1];
 
@@ -366,10 +367,46 @@ public class MapaNivel : MonoBehaviour {
 				return false;
 			}
 		}
+        //---LEER POSICIÓN---
 
+        string str_posiciones = datosPieza[2];
+        string[] splitPosiciones = str_posiciones.Split(DataJuego.charsSeparadores[3]);
 
-		//---LEER EXISTENCIA---
-		string str_existencia = datosPieza [2];
+        if ((tipoMapa == TipoMapaNivel.MAPA_2D && splitPosiciones.Length != 2) ||
+		   (tipoMapa == TipoMapaNivel.MAPA_3D && splitPosiciones.Length != 3)) {
+			logErrorPieza ("La cantidad de coordenadas de posición especificadas para la pieza (" + splitPosiciones.Length + ") no corresponde con el TipoMapaNivel especificado (" + tipoMapa + ")");
+			return false;
+		}
+
+        string str_posX = splitPosiciones[0];
+        string str_posY = splitPosiciones[1];
+
+        int posX_leido;
+        int posY_leido;
+        int posZ_leido = 0;
+
+        if (!int.TryParse(str_posX, out posX_leido))
+        {
+            logErrorPieza("Posición X de la pieza no se traduce como un número entero");
+            return false;
+        }
+        if (!int.TryParse(str_posY, out posY_leido))
+        {
+            logErrorPieza("Posición Y de la pieza no se traduce como un número entero");
+            return false;
+        }
+        if (tipoMapa == TipoMapaNivel.MAPA_3D)
+        {
+            string str_posZ = splitPosiciones[2];
+            if (!int.TryParse(str_posZ, out posZ_leido))
+            {
+                logErrorPieza("Dimensión Z de la pieza no se traduce como un número entero");
+                return false;
+            }
+        }
+
+        //---LEER EXISTENCIA---
+        string str_existencia = datosPieza [3];
 		string[] split_existencia = str_existencia.Split (DataJuego.charsSeparadores [3]);
 		if (split_existencia.Length != largoY_leido * largoZ_leido) {
 			logErrorPieza ("La cantidad de filas de la pieza no se corresponde con las dimensiones especificadas anteriormente (X:"+largoX_leido+", Y:"+largoY_leido+", Z:"+largoZ_leido+")");
@@ -399,7 +436,7 @@ public class MapaNivel : MonoBehaviour {
 		//---LEER METADATA---
 		if (tieneMetadata) {
 			
-			string str_metadata = datosPieza [3];
+			string str_metadata = datosPieza [4];
 			string[] split_metadata = str_metadata.Split (DataJuego.charsSeparadores [3]);
 			if (split_metadata.Length != largoY_leido * largoZ_leido) {
 				logErrorPieza ("La cantidad de filas de la metadata de la pieza no se corresponde con las dimensiones especificadas anteriormente (X:"+largoX_leido+", Y:"+largoY_leido+", Z:"+largoZ_leido+")");
@@ -433,7 +470,13 @@ public class MapaNivel : MonoBehaviour {
 				}
 			}
 		}
-		anadirPieza (tipoPieza_leido, new Vector3Int (largoX_leido, largoY_leido, largoZ_leido), existencia_leido, metadata_leido);
+		anadirPieza (
+            tipoPieza_leido,
+            new Vector3Int (largoX_leido, largoY_leido, largoZ_leido),
+            new Vector3Int (posX_leido, posY_leido, posZ_leido),
+            existencia_leido,
+            metadata_leido
+        );
 		return true;
 	}
 

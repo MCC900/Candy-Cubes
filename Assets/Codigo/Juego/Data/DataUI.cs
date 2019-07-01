@@ -7,7 +7,7 @@ public class DataUI : MonoBehaviour
 
     public static DataUI i;
 
-    //--PROPIEDADES ASIGNABLES--
+    //--PROPIEDADES AJUSTABLES--
     public RecuadroInterfaz menuPrincipal;
 	public RecuadroInterfaz seleccionNiveles;
 	public RecuadroInterfaz pantallaCarga;
@@ -20,6 +20,7 @@ public class DataUI : MonoBehaviour
     public Material matRenderMundo;
 
     public Material cielo;
+    public ReflectionProbe rpCielo;
 
     public Cubemap cieloPradera;
     public Cubemap cieloNieve;
@@ -58,8 +59,10 @@ public class DataUI : MonoBehaviour
         {
             animCielo = (Time.fixedTime - tiempoInicio) / duracionCambioCielo;
             cielo.SetFloat("_Tiempo", animCielo);
+            RenderSettings.customReflection = cieloDestino;
             yield return null;
         }
+        RenderSettings.customReflection = cieloDestino;
         cieloCambiando = false;
         cielo.SetFloat("_Tiempo", 1F);
         animCielo = 1F;
@@ -118,7 +121,6 @@ public class DataUI : MonoBehaviour
                 cieloDestino = DataJuego.i.dataUI.cieloNieve;
                 break;
         }
-
         if (cieloActual != cieloDestino)
         {
             cieloCambiando = true;

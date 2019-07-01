@@ -45,8 +45,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8df5c962be5350547a39d107bfc8b206, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mapaNivelPrincipal: {fileID: 0}
   dataMuestrarios: {fileID: 2117001904248331520}
-  dataUI: {fileID: 0}
+  dataUI: {fileID: 2245598915323375091}
 --- !u!1 &2117001904248331527
 GameObject:
   m_ObjectHideFlags: 0
@@ -100,7 +101,12 @@ MonoBehaviour:
     type: 3}
   carameloVerde: {fileID: 1045834741045230, guid: 53122139591168944a36df7fee8050de,
     type: 3}
-  carameloNaranja: {fileID: 0}
+  carameloNaranja: {fileID: 4402803072338623985, guid: e7980ecfa59510c40979e73a50cf7744,
+    type: 3}
+  carameloAzul: {fileID: 4099670641194719383, guid: c99d6bda3a2667f4586357b97b7390e6,
+    type: 3}
+  objetivoRojo: {fileID: 3542214327502179193, guid: 3598f2e543dd7a442aae2e730b2d27c1,
+    type: 3}
   materialTierra: {fileID: 0}
 --- !u!1 &4916762969428370747
 GameObject:
@@ -149,3 +155,14 @@ MonoBehaviour:
   seleccionNiveles: {fileID: 0}
   pantallaCarga: {fileID: 0}
   pantallaNivel: {fileID: 0}
+  camaraUI: {fileID: 0}
+  camaraMundo: {fileID: 0}
+  renderTexMundo: {fileID: 8400000, guid: 83af167221c9a424c84e43b7a50d2a4f, type: 2}
+  quadRenderMundo: {fileID: 0}
+  matRenderMundo: {fileID: 2100000, guid: dbd7a4f28fc94404e89ce36b37a97d34, type: 2}
+  cielo: {fileID: 2100000, guid: db8001eab5064164ba443b5b5e9d20bf, type: 2}
+  rpCielo: {fileID: 0}
+  cieloPradera: {fileID: 8900000, guid: 70c8473432540b54ba77a4bf946537f0, type: 3}
+  cieloNieve: {fileID: 8900000, guid: f3e52532aad04de4ebb92cbf3bd22094, type: 3}
+  duracionCambioCielo: 1
+  duracionEntradaMapaNivel: 1

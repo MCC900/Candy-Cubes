@@ -1,47 +1,58 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 #if UNITY_EDITOR
 using UnityEditor.Animations;
 #endif
 
-public class RecuadroInterfaz : MonoBehaviour {
+public class RecuadroInterfaz : MonoBehaviour, IObjetoRectAutoajustable {
 
-	//=====PROPIEDADES AJUSTABLES=====
+	//--PROPIEDADES AJUSTABLES--
 	float segundosDuracionAnim = 0.65F;
 	EasingFunction.Ease easing = EasingFunction.Ease.EaseOutQuart; //Suavizado de animacion (easing)
 
 	public enum EstadoRecuadro {QUIETO, ENTRANDO, SALIENDO, FUERA, DESACTIVADO};
 	public EstadoRecuadro estado;
 
-
-	//=======VARIABLES PRIVADAS=======
-	EasingFunction.Function easingFunc;
+    //--PROPIEDADES INTERNAS--
+    EasingFunction.Function easingFunc;
 
 	float anchoPrev = 0; //Ancho de la pantalla en el momento anterior
 	float altoPrev = 0; //Alto de la pantalla en el momento anterior
 	float momentoInicioAnim; //Momento en el que inicio la animacion
 	bool interactivo = true; //Si los botones y menus hijos estan funcionando, i.e. el recuadro es interactivo
 
+    bool ejecActualizarRI = false;
+    bool inicializado = false;
+
 	Collider2D[] collidersHijos;
+    RectTransform rtPadre;
 
-	//==========COMPONENTES===========
-	RectTransform rectTransform;
+    //==========COMPONENTES===========
+    RectTransform rectTransform;
 
-	//----------------EVENTOS UNITY-----------------------
+    //----------------EVENTOS UNITY-----------------------
+    
+    void init()
+    {
+        collidersHijos = UtilComponentes.getComponentesEnDescendencia<Collider2D>(gameObject).ToArray();
+        easingFunc = EasingFunction.GetEasingFunction(easing);
+        actualizarAsociarComponentes();
+        actualizarTamanoRecuadro();
+        inicializado = true;
+    }
 
-	void Start () {
-		collidersHijos = UtilComponentes.getComponentesEnDescendencia<Collider2D>(gameObject).ToArray();
-		easingFunc = EasingFunction.GetEasingFunction (easing);
-		actualizarAsociarComponentes ();
-		//actualizarTamanoRecuadro ();
+    void Awake () {
+        init();
 	}
-		
-	[ExecuteInEditMode]
+	
+    [ExecuteInEditMode]
 	void Update(){
-		#if UNITY_EDITOR
-		if (!UnityEditor.EditorApplication.isPlaying) {
+        ejecActualizarRI = false;
+        #if UNITY_EDITOR
+        if (!UnityEditor.EditorApplication.isPlaying) {
 			//EDITOR
 			updateEditor();
 		} else {
@@ -53,15 +64,38 @@ public class RecuadroInterfaz : MonoBehaviour {
 		#endif
 	}
 
-	#if UNITY_EDITOR
-	void updateEditor(){
-		if (Screen.width != anchoPrev || Screen.height != altoPrev) {
-			anchoPrev = Screen.width;
-			altoPrev = Screen.height;
-			actualizarTamanoRecuadro ();
-		}
-	}
-	#endif
+    void OnValidate()
+    {
+        if (inicializado)
+            actualizarObjetoRectEditor();
+    }
+
+    //UI.Graphic
+    void OnRectTransformDimensionsChange()
+    {
+        actualizarTamanoRecuadro();
+    }
+
+    #if UNITY_EDITOR
+
+        void updateEditor()
+        {
+            if (Screen.width != anchoPrev || Screen.height != altoPrev) {
+			    anchoPrev = Screen.width;
+			    altoPrev = Screen.height;
+                setTamanoRecuadro();
+		    }
+        
+	    }
+
+    #endif
+
+    [ContextMenu("Actualizar Tamaño Recuadro")]
+    public void actualizarObjetoRectEditor()
+    {
+        actualizarAsociarComponentes();
+        setTamanoRecuadro();
+    }
 
 	void updateJuego(){
 		switch (estado) {
@@ -90,26 +124,44 @@ public class RecuadroInterfaz : MonoBehaviour {
 			break;
 		}
 	}
-	//----------------------------------------------------
-	//------------------ACTUALIZACIÓN---------------------
-
-	[ContextMenu("Actualizar Tamaño Recuadro")]
-	void actualizarTamanoRecuadro(){
-		rectTransform.sizeDelta = new Vector2 (Screen.width, Screen.height);
+    //----------------------------------------------------
+    //------------------ACTUALIZACIÓN---------------------
+    void actualizarTamanoRecuadro()
+    {
+        if (!ejecActualizarRI)
+        {
+            ejecActualizarRI = true;
+            StartCoroutine(corActualizarTamanoRecuadro());
+        }
+    }
+	IEnumerator corActualizarTamanoRecuadro()
+    {
+		yield return new WaitForEndOfFrame ();
+        setTamanoRecuadro();
 	}
-		
+	
+    void setTamanoRecuadro()
+    {
+        rectTransform.sizeDelta = new Vector2(rtPadre.rect.width, rtPadre.rect.height);
+    }
+
 	void actualizarAsociarComponentes(){
 		actualizarAsociarRectTransform ();
+        actualizarAsociarRTPadre();
 	}
 
 	void actualizarAsociarRectTransform(){
 		rectTransform = GetComponent<RectTransform> ();
 	}
 
-	//----------------------------------------------------
-	//--------------------CONTROL-------------------------
+    void actualizarAsociarRTPadre()
+    {
+        rtPadre = transform.parent.GetComponent<RectTransform>();
+    }
+    //----------------------------------------------------
+    //--------------------CONTROL-------------------------
 
-	public void entraRecuadro(){
+    public void entraRecuadro(){
 		gameObject.SetActive (true);
 		activarInteraccion ();
 		estado = EstadoRecuadro.ENTRANDO;
