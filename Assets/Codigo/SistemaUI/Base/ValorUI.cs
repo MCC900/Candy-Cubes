@@ -46,4 +46,33 @@ public class ValorUI {
 			return valorPx;
 		}
 	}
+
+    public float getValorPx(RectTransform rt)
+    {
+        float valorPx;
+        switch (tipoValor)
+        {
+            case TipoValorUI.FIJO_PX:
+                valorPx = valor;
+                break;
+            case TipoValorUI.FIJO_MM:
+                valorPx = valor * resolucion;
+                break;
+            case TipoValorUI.PORCENTAJE_ANCHO:
+                valorPx = rt.rect.width * (valor / 100F);
+                break;
+            //case TipoValorUI.PORCENTAJE_ALTO:
+            default:
+                valorPx = rt.rect.height * (valor / 100F);
+                break;
+        }
+        if (pixelPerfect)
+        {
+            return Mathf.Round(valorPx);
+        }
+        else
+        {
+            return valorPx;
+        }
+    }
 }

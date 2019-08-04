@@ -70,13 +70,19 @@ public class Margenes : MonoBehaviour, IObjetoRectAutoajustable {
 
 	public void actualizarAsociarRectTransform(){
 		this.rectTransform = GetComponent<RectTransform> ();
-	}
+    }
 
 	public void actualizarAsociarRectPadre(){
 		this.rtPadre = transform.parent.GetComponent<RectTransform> ();
-	}
+        this.arriba.rectTransform = this.rtPadre;
+        this.abajo.rectTransform = this.rtPadre;
+        this.izquierda.rectTransform = this.rtPadre;
+        this.derecha.rectTransform = this.rtPadre;
+    }
 		
 	void ajustarseARectPadre(){
+        rectTransform.anchorMin = Vector2.zero;
+        rectTransform.anchorMax = Vector2.one;
 		rectTransform.offsetMin = new Vector2 (izquierda.getValorPx (), abajo.getValorPx ());
 		rectTransform.offsetMax = new Vector2 (-derecha.getValorPx (), -arriba.getValorPx ());
 	}

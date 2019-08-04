@@ -209,6 +209,65 @@ public class MapaNivel : MonoBehaviour {
         DataUI.i.terminaDeGenerarNivel();
     }
 
+    public void empezarAGenerarCreador(int ancho, int largo, int alto, TipoMapaNivel tipo)
+    {
+        this.limpiarMapaNivel();
+        this.tipoMapaNivel = tipo;
+        this.dimensiones = new Vector3Int(ancho, alto + 1, largo);
+        transform.localPosition = -((Vector3)this.dimensiones / 2F) + new Vector3(0.5F, 0.5F, 0.5F);
+        this.tipoPaisaje = TipoPaisaje.PRADERA;
+
+        Vector3Int dimensionesTerreno = new Vector3Int(ancho, 2, largo);
+        Array3DBool existenciaTerreno = new Array3DBool(ancho, 2, largo);
+
+        for(int y = 0; y < 2; y++)
+        {
+            if (y == 0)
+            {
+                //Rellenamos todo
+                for (int x = 0; x < ancho; x++)
+                {
+                    for (int z = 0; z < largo; z++)
+                    {
+                        existenciaTerreno[x, y, z] = true;
+                    }
+                }
+            } else
+            {
+                //Rellenamos solo el borde;
+                for (int x = 0; x < ancho; x++)
+                {
+                    bool bordeX = (x == 0 || x == ancho - 1);
+                    if (bordeX)
+                    {
+                        for (int z = 0; z < largo; z++)
+                        {
+                            existenciaTerreno[x, y, z] = true;
+                        }
+                    } else
+                    {
+                        for (int z = 0; z < largo; z++)
+                        {
+                            bool bordeZ = (z == 0 || z == largo - 1);
+                            if (bordeZ)
+                            {
+                                existenciaTerreno[x, y, z] = true;
+                            } else
+                            {
+                                existenciaTerreno[x, y, z] = false;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Array3DInt metadataTerreno = new Array3DInt();
+
+        this.anadirPieza(Pieza.TipoPieza.TERRENO, dimensionesTerreno, Vector3Int.zero, existenciaTerreno, metadataTerreno);
+        DataUI.i.terminaDeGenerarNivel();
+    }
+
     /// <summary>
     /// Codifica una pieza a un string que la define exactamente, y que puede ser decodificado posteriormente.
     /// </summary>

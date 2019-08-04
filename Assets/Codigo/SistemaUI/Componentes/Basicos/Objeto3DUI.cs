@@ -10,7 +10,7 @@ public class Objeto3DUI : MonoBehaviour, IObjetoRectAutoajustable {
 
 	//==========COMPONENTES===========
 	RectTransform rtPadre;
-	RectTransform rectTransform;
+	//RectTransform rectTransform;
 	MeshFilter meshFilter;
 
 	//===========CORUTINAS============
@@ -29,8 +29,10 @@ public class Objeto3DUI : MonoBehaviour, IObjetoRectAutoajustable {
 	}
 		
 	//UI.Graphic
-	void OnRectTransformDimensionsChange(){
-		actualizarEscala ();
+	void OnRectTransformDimensionsChange()
+    {
+        if (gameObject.activeInHierarchy)
+            actualizarEscala ();
 	}
 
 	void OnValidate(){
@@ -99,7 +101,7 @@ public class Objeto3DUI : MonoBehaviour, IObjetoRectAutoajustable {
 
 	public void actualizarAsociarComponentes(){
 		actualizarAsociarRectPadre ();
-		actualizarAsociarRectTransform ();
+		//actualizarAsociarRectTransform ();
 		actualizarAsociarMeshFilter ();
 	}
 
@@ -108,9 +110,11 @@ public class Objeto3DUI : MonoBehaviour, IObjetoRectAutoajustable {
 			this.rtPadre = transform.parent.GetComponent<RectTransform> ();
 	}
 
+    /*
 	public void actualizarAsociarRectTransform(){
 		this.rectTransform = GetComponent<RectTransform> ();
 	}
+    */
 
 	public void actualizarAsociarMeshFilter(){
 		this.meshFilter = GetComponent<MeshFilter> ();

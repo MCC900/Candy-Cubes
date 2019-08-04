@@ -1,5 +1,48 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &539643664106925210
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6750330056827522143}
+  - component: {fileID: 1100961965893063487}
+  m_Layer: 0
+  m_Name: CreadorNiveles
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6750330056827522143
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 539643664106925210}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 2117001903270835002}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1100961965893063487
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 539643664106925210}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea87dda96c8ac3b43a9e25232f16742e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2117001903270835000
 GameObject:
   m_ObjectHideFlags: 0
@@ -30,6 +73,7 @@ Transform:
   m_Children:
   - {fileID: 2117001904248331521}
   - {fileID: 3149912410631316495}
+  - {fileID: 6750330056827522143}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -48,6 +92,7 @@ MonoBehaviour:
   mapaNivelPrincipal: {fileID: 0}
   dataMuestrarios: {fileID: 2117001904248331520}
   dataUI: {fileID: 2245598915323375091}
+  creadorNiveles: {fileID: 1100961965893063487}
 --- !u!1 &2117001904248331527
 GameObject:
   m_ObjectHideFlags: 0
@@ -95,8 +140,6 @@ MonoBehaviour:
     type: 3}
   terrenoPasto_1: {fileID: 1570437581036761711, guid: 9d47995d943bc214f9137d4fc6d2ac16,
     type: 3}
-  terrenoPasto_2: {fileID: 2225220409203408160, guid: ba52b10f490cff944b85f8b4433390db,
-    type: 3}
   carameloRojo: {fileID: 1799078587274102, guid: 7b2aca5637962884fadc452e557138a2,
     type: 3}
   carameloVerde: {fileID: 1045834741045230, guid: 53122139591168944a36df7fee8050de,
@@ -105,9 +148,15 @@ MonoBehaviour:
     type: 3}
   carameloAzul: {fileID: 4099670641194719383, guid: c99d6bda3a2667f4586357b97b7390e6,
     type: 3}
+  carameloAmarillo: {fileID: 0}
+  carameloVioleta: {fileID: 0}
   objetivoRojo: {fileID: 3542214327502179193, guid: 3598f2e543dd7a442aae2e730b2d27c1,
     type: 3}
-  materialTierra: {fileID: 0}
+  objetivoVerde: {fileID: 0}
+  objetivoNaranja: {fileID: 0}
+  objetivoAzul: {fileID: 0}
+  objetivoAmarillo: {fileID: 0}
+  objetivoVioleta: {fileID: 0}
 --- !u!1 &4916762969428370747
 GameObject:
   m_ObjectHideFlags: 0
@@ -155,6 +204,7 @@ MonoBehaviour:
   seleccionNiveles: {fileID: 0}
   pantallaCarga: {fileID: 0}
   pantallaNivel: {fileID: 0}
+  pantallaEditor: {fileID: 0}
   camaraUI: {fileID: 0}
   camaraMundo: {fileID: 0}
   renderTexMundo: {fileID: 8400000, guid: 83af167221c9a424c84e43b7a50d2a4f, type: 2}
@@ -166,3 +216,7 @@ MonoBehaviour:
   cieloNieve: {fileID: 8900000, guid: f3e52532aad04de4ebb92cbf3bd22094, type: 3}
   duracionCambioCielo: 1
   duracionEntradaMapaNivel: 1
+  matsOpcionDeseleccionada: []
+  matsOpcionSeleccionada: []
+  matTextoOpcionSeleccionada: {fileID: 0}
+  matTextoOpcionDeseleccionada: {fileID: 0}

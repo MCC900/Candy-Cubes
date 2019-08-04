@@ -24,6 +24,7 @@ public class DataJuego : MonoBehaviour {
 
     public DataMuestrarios dataMuestrarios;
 	public DataUI dataUI;
+    public CreadorNiveles creadorNiveles;
 
 	#if UNITY_EDITOR
 	static DataJuego(){
@@ -40,6 +41,7 @@ public class DataJuego : MonoBehaviour {
 						i = dj;
                         DataUI.i = dj.dataUI;
                         DataMuestrarios.i = dj.dataMuestrarios;
+                        CreadorNiveles.i = dj.creadorNiveles;
 						Debug.Log ("Instancia de DataJuego adquirida");
 					}
 				}
@@ -55,18 +57,23 @@ public class DataJuego : MonoBehaviour {
 		
 	public static int cantidadEstadosTipoPieza(Pieza.TipoPieza tipo){
 		switch (tipo) {
-		case Pieza.TipoPieza.CARAMELO_ROJO:
-		case Pieza.TipoPieza.CARAMELO_VERDE:
-		case Pieza.TipoPieza.CARAMELO_NARANJA:
-        case Pieza.TipoPieza.CARAMELO_AZUL:
-        case Pieza.TipoPieza.CARAMELO_AMARILLO:
-        case Pieza.TipoPieza.CARAMELO_VIOLETA:
-        case Pieza.TipoPieza.OBJETIVO_ROJO:
-			return 1; //1 único estado implica que no tiene metadata
-		case Pieza.TipoPieza.TERRENO_PASTO:
-			return 3;
-		default:
-			return 0;
+		    case Pieza.TipoPieza.CARAMELO_ROJO:
+		    case Pieza.TipoPieza.CARAMELO_VERDE:
+		    case Pieza.TipoPieza.CARAMELO_NARANJA:
+            case Pieza.TipoPieza.CARAMELO_AZUL:
+            case Pieza.TipoPieza.CARAMELO_AMARILLO:
+            case Pieza.TipoPieza.CARAMELO_VIOLETA:
+            case Pieza.TipoPieza.OBJETIVO_ROJO:
+            case Pieza.TipoPieza.OBJETIVO_VERDE:
+            case Pieza.TipoPieza.OBJETIVO_NARANJA:
+            case Pieza.TipoPieza.OBJETIVO_AZUL:
+            case Pieza.TipoPieza.OBJETIVO_AMARILLO:
+            case Pieza.TipoPieza.OBJETIVO_VIOLETA:
+                    return 1; //1 único estado implica que no tiene metadata
+		    case Pieza.TipoPieza.TERRENO:
+			    return 3;
+		    default:
+			    return 0;
 		}
 	}
 
@@ -85,6 +92,7 @@ public class DataJuego : MonoBehaviour {
 			i = gameObject.GetComponent<DataJuego>();
             DataUI.i = i.dataUI;
             DataMuestrarios.i = i.dataMuestrarios;
+            CreadorNiveles.i = i.creadorNiveles;
 		}
 	}
 

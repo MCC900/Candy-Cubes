@@ -112,6 +112,7 @@ public class MuestrarioSubTrozos
 		//1 vecino
 		} else if (vecindadEsquina [1, 0, 0] && !vecindadEsquina [0, 1, 0] && !vecindadEsquina [0, 0, 1]) {
 			subTrozos.TryGetValue ((int)TipoSubTrozo.EJE_X, out posibilidades);
+
 		} else if (!vecindadEsquina [1, 0, 0] && vecindadEsquina [0, 1, 0] && !vecindadEsquina [0, 0, 1]) {
 			subTrozos.TryGetValue ((int)TipoSubTrozo.EJE_Y, out posibilidades);
 		} else if (!vecindadEsquina [1, 0, 0] && !vecindadEsquina [0, 1, 0] && vecindadEsquina [0, 0, 1]) {

@@ -284,31 +284,6 @@ public class GeneradorSubTrozosPieza : MonoBehaviour {
 	/// </summary>
 	/// <param name="transf">Transform que contendrá a los 8 subTrozos como hijos.</param>
 	void recargarCasoTrozo(Transform transf){
-        /*
-		Mesh modelo = transf.GetComponent<MeshFilter> ().sharedMesh;
-
-		for (int i = 0; i < 8; i++) {
-			string ruta = AssetDatabase.GetAssetPath (modelo.GetInstanceID ());
-			ruta = ruta.Substring (0, ruta.LastIndexOf ('/')+1) + transf.name;
-			if (!Directory.Exists (ruta)) {
-				Directory.CreateDirectory (ruta);
-			}
-			ruta = ruta + "/" + transf.name + "_" + nombresSubTrozos[i] + ".asset";
-			Mesh meshSubTrozo = AssetDatabase.LoadAssetAtPath<Mesh> (ruta);
-
-            GameObject goSubTrozo = new GameObject (transf.name + "_" + nombresSubTrozos [i]);
-
-			MeshRenderer mr = goSubTrozo.AddComponent<MeshRenderer> ();
-			MeshFilter mf = goSubTrozo.AddComponent<MeshFilter> ();
-			mf.sharedMesh = meshSubTrozo;
-            mr.sharedMaterials = transf.GetComponent<MeshRenderer>().sharedMaterials;
-
-           //mr.sharedMaterial = transf.GetComponent<MeshRenderer> ().sharedMaterial;
-
-			goSubTrozo.transform.SetParent (transf);
-			goSubTrozo.transform.localPosition = Vector3.zero;
-		}
-        */
         Mesh modelo = transf.GetComponent<MeshFilter>().sharedMesh;
 
         List<Vector3>[] vertsOctantes = new List<Vector3>[8];

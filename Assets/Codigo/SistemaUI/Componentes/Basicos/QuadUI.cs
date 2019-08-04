@@ -1,7 +1,5 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using System;
 
 public class QuadUI : MonoBehaviour, IObjetoRectAutoajustable {
 	//======COMPONENTES======
@@ -27,7 +25,7 @@ public class QuadUI : MonoBehaviour, IObjetoRectAutoajustable {
 
 	//UI.Graphic
 	void OnRectTransformDimensionsChange(){
-		actualizarMesh ();
+	    actualizarMesh ();
 	}
 
 	void OnValidate(){
@@ -53,15 +51,15 @@ public class QuadUI : MonoBehaviour, IObjetoRectAutoajustable {
 	void actualizarMesh(){
 		if (!ejecActualizarMesh) {
 			this.ejecActualizarMesh = true;
-			StartCoroutine(corActualizarMesh());
+            if (gameObject.activeInHierarchy)
+                StartCoroutine(corActualizarMesh());
 		}
 	} //+------+//
 	IEnumerator corActualizarMesh(){
-		//!!! -- NO VERIFICA DESAPARICIÓN O CAMBIO EN LOS COMPONENTES ASOCIADOS POR TEMAS DE EFICIENCIA.
-		//TODO ACTUALIZACIÓN EXTERNA AL CAMBIAR O ELIMINARSE RectTransform o MeshFilter
-
+        //!!! -- NO VERIFICA DESAPARICIÓN O CAMBIO EN LOS COMPONENTES ASOCIADOS POR TEMAS DE EFICIENCIA.
+        //TODO ACTUALIZACIÓN EXTERNA AL CAMBIAR O ELIMINARSE RectTransform o MeshFilter
 		yield return new WaitForEndOfFrame ();
-		this.generarMesh ();
+        this.generarMesh ();
 		MeshGen.actualizarMesh (this.meshFilter.mesh, true);
 	}
 	[ContextMenu("Actualizar Mesh")]

@@ -6,7 +6,7 @@ public static class PintadorTrozos
 	public static void pintarTrozo(TrozoPieza trozo, Pieza.TipoPieza tipoPieza, bool[,,] mapaVecindad, int metadata){
 		switch (tipoPieza) {
 
-		case Pieza.TipoPieza.TERRENO_PASTO:
+		case Pieza.TipoPieza.TERRENO:
 			if (mapaVecindad [1, 2, 1]) { //Tiene vecino superior
 				
 			} else {

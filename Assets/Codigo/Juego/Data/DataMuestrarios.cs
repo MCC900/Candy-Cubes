@@ -5,7 +5,6 @@ public class DataMuestrarios : MonoBehaviour {
 
 	public GameObject terrenoPasto_0;
 	public GameObject terrenoPasto_1;
-	public GameObject terrenoPasto_2;
 
 	public GameObject carameloRojo;
 	public GameObject carameloVerde;
@@ -15,20 +14,28 @@ public class DataMuestrarios : MonoBehaviour {
     public GameObject carameloVioleta;
 
     public GameObject objetivoRojo;
-
-	public Material materialTierra;
+    public GameObject objetivoVerde;
+    public GameObject objetivoNaranja;
+    public GameObject objetivoAzul;
+    public GameObject objetivoAmarillo;
+    public GameObject objetivoVioleta;
 
 	[ContextMenu("Cargar")]
-	public void cargarMuestrarios(){
-		MuestrarioPiezas.cargarMuestrario (Pieza.TipoPieza.CARAMELO_ROJO, 0, carameloRojo);
+	public void cargarMuestrarios()
+    {
+        MuestrarioPiezas.cargarMuestrario(Pieza.TipoPieza.TERRENO, 0, terrenoPasto_0);
+        MuestrarioPiezas.cargarMuestrario(Pieza.TipoPieza.TERRENO, 1, terrenoPasto_1);
+        MuestrarioPiezas.cargarMuestrario (Pieza.TipoPieza.CARAMELO_ROJO, 0, carameloRojo);
 		MuestrarioPiezas.cargarMuestrario (Pieza.TipoPieza.CARAMELO_VERDE, 0, carameloVerde);
         MuestrarioPiezas.cargarMuestrario(Pieza.TipoPieza.CARAMELO_NARANJA, 0, carameloNaranja);
         MuestrarioPiezas.cargarMuestrario(Pieza.TipoPieza.CARAMELO_AZUL, 0, carameloAzul);
         MuestrarioPiezas.cargarMuestrario(Pieza.TipoPieza.CARAMELO_AMARILLO, 0, carameloAmarillo);
         MuestrarioPiezas.cargarMuestrario(Pieza.TipoPieza.CARAMELO_VIOLETA, 0, carameloVioleta);
-        MuestrarioPiezas.cargarMuestrario (Pieza.TipoPieza.TERRENO_PASTO, 0, terrenoPasto_0);
-		MuestrarioPiezas.cargarMuestrario (Pieza.TipoPieza.TERRENO_PASTO, 1, terrenoPasto_1);
-		MuestrarioPiezas.cargarMuestrario (Pieza.TipoPieza.TERRENO_PASTO, 2, terrenoPasto_2);
-        MuestrarioPiezas.cargarMuestrario (Pieza.TipoPieza.OBJETIVO_ROJO, 0, objetivoRojo);
+        MuestrarioPiezas.cargarMuestrario(Pieza.TipoPieza.OBJETIVO_ROJO, 0, objetivoRojo);
+        MuestrarioPiezas.cargarMuestrario(Pieza.TipoPieza.OBJETIVO_VERDE, 0, objetivoVerde);
+        MuestrarioPiezas.cargarMuestrario(Pieza.TipoPieza.OBJETIVO_NARANJA, 0, objetivoNaranja);
+        MuestrarioPiezas.cargarMuestrario(Pieza.TipoPieza.OBJETIVO_AZUL, 0, objetivoAzul);
+        MuestrarioPiezas.cargarMuestrario(Pieza.TipoPieza.OBJETIVO_AMARILLO, 0, objetivoAmarillo);
+        MuestrarioPiezas.cargarMuestrario(Pieza.TipoPieza.OBJETIVO_VIOLETA, 0, objetivoVioleta);
     }
 }

@@ -4,23 +4,28 @@ using UnityEngine;
 public class Boton : MonoBehaviour {
     
     //=====PROPIEDADES AJUSTABLES=====
-	protected Action AlHacerClick;
-    protected Action AlEntrarEnFoco;
-    protected Action AlSalirDeFoco;
-    protected Action BotonMouseBaja;
-    protected Action BotonMouseSube;
-    protected Action BotonMouseSubeFuera;
+	public Action AlHacerClick;
+    public Action AlEntrarEnFoco;
+    public Action AlSalirDeFoco;
+    public Action BotonMouseBaja;
+    public Action BotonMouseSube;
+    public Action BotonMouseSubeFuera;
 
-	//=======VARIABLES PRIVADAS=======
+    //=======VARIABLES PRIVADAS=======
+    [NonSerialized] public RectTransform rectTransform;
+    [NonSerialized] public BoxCollider2D box2DCollider;
+
 	bool pulsandoMouse;
 	bool mouseEncima;
 
 	//----------------EVENTOS UNITY-----------------------
 
-	void Awake(){
+	protected virtual void Awake(){
 		pulsandoMouse = false;
 		mouseEncima = false;
-	}
+        this.box2DCollider = GetComponent<BoxCollider2D>();
+        this.rectTransform = GetComponent<RectTransform>();
+    }
 
 	void OnMouseEnter(){
         mouseEncima = true;
@@ -53,5 +58,11 @@ public class Boton : MonoBehaviour {
         pulsandoMouse = false;
     }
 
-	//---------------------------------------------------
+    public void OnRectTransformDimensionsChange()
+    {
+        if (this.box2DCollider)
+            this.box2DCollider.size = this.rectTransform.rect.size;
+    }
+
+    //---------------------------------------------------
 }

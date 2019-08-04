@@ -1,16 +1,16 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using System.IO;
 
 public class PanelUI : MonoBehaviour, IObjetoRectAutoajustable {
 	public enum TipoRepeticionPanelUI{REPETIR, AJUSTAR};
 
-	public Material material;
-	public Sprite spriteReferencia;
-	public Vector2 tamanoEsquinaTopLeft = new Vector2(20,20);
-	public TipoRepeticionPanelUI tipoRepeticion = TipoRepeticionPanelUI.AJUSTAR;
-	public bool pixelPerfect = true;
+    public PresetPanelUI presetPanelUI;
+	//public Material material;
+	//public Sprite spriteReferencia;
+    //public ValorUI tamanoEsquinaTopLeftX = new ValorUI(ValorUI.TipoValorUI.FIJO_PX, 20);
+    //public ValorUI tamanoEsquinaTopLeftY = new ValorUI(ValorUI.TipoValorUI.FIJO_PX, 20);
+	//public TipoRepeticionPanelUI tipoRepeticion = TipoRepeticionPanelUI.AJUSTAR;
+	//public bool pixelPerfect = true;
 
 	//======COMPONENTES======
 	RectTransform rectTransform;
@@ -39,7 +39,8 @@ public class PanelUI : MonoBehaviour, IObjetoRectAutoajustable {
 
 	//UI.Graphic
 	void OnRectTransformDimensionsChange(){
-		actualizarMesh ();
+        if(gameObject.activeInHierarchy)
+		    actualizarMesh ();
 	}
 
 	#if UNITY_EDITOR
@@ -52,18 +53,26 @@ public class PanelUI : MonoBehaviour, IObjetoRectAutoajustable {
 	//---------------------------------------------------
 	//-----------------INICIALIZACIÓN--------------------
 
-	[ContextMenu("Init")]
 	void init(){
 		inicializado = true;
 		actualizarAsociarComponentes ();
-		this.meshFilter.mesh = new Mesh ();
-		actualizarMesh ();
+		this.meshFilter.sharedMesh = new Mesh ();
+        actualizarMesh();
 	}
 
-	//---------------------------------------------------
-	//-----------------ACTUALIZACIÓN---------------------
+    #if UNITY_EDITOR
+    [ContextMenu("Init")]
+    void initEditor()
+    {
+        init();
+        actualizarObjetoRectEditor();
+    }
+    #endif
 
-	void actualizarMesh(){
+    //---------------------------------------------------
+    //-----------------ACTUALIZACIÓN---------------------
+
+    void actualizarMesh(){
 		if (!ejecActualizarMesh) {
 			this.ejecActualizarMesh = true;
 			StartCoroutine(corActualizarMesh());
@@ -75,12 +84,13 @@ public class PanelUI : MonoBehaviour, IObjetoRectAutoajustable {
 		//TODO ACTUALIZACIÓN EXTERNA AL CAMBIAR O ELIMINARSE RectTransform, MeshFilter o MeshRenderer
 
 		yield return new WaitForEndOfFrame ();
-		this.generarMesh ();
-		MeshGen.actualizarMesh (this.meshFilter.mesh, true);
-	}
+        this.generarMesh ();
+        //MeshGen.actualizarMesh (this.meshFilter.mesh, true);
+        MeshGen.actualizarMesh (this.meshFilter.sharedMesh, true);
+    }
 
-	#if UNITY_EDITOR
-	[ContextMenu("Actualizar Mesh")]
+#if UNITY_EDITOR
+    [ContextMenu("Actualizar Mesh")]
 	public void actualizarObjetoRectEditor(){
 		this.actualizarAsociarComponentes (); //Estamos en el editor, no nos preocupa eficiencia y se cambian/borran componentes constantemente
 		this.generarSubMateriales ();
@@ -91,12 +101,12 @@ public class PanelUI : MonoBehaviour, IObjetoRectAutoajustable {
 
 	[ContextMenu("Actualizar Texturado")]
 	public void actualizarTexturadoEditor(){
-		PanelUIManager.getGrupoMateriales (this.material, this.spriteReferencia.border).forzarActualizarAssets();
+		PanelUIManager.getGrupoMateriales (this.presetPanelUI.material, this.presetPanelUI.spriteReferencia.border).forzarActualizarAssets();
 		this.actualizarObjetoRectEditor ();
 	}
 	[ContextMenu("Actualizar Materiales")]
 	public void actualizarMaterialesEditor(){
-		PanelUIManager.getGrupoMateriales (this.material, this.spriteReferencia.border).forzarActualizarMateriales();
+		PanelUIManager.getGrupoMateriales (this.presetPanelUI.material, this.presetPanelUI.spriteReferencia.border).forzarActualizarMateriales();
 		this.actualizarObjetoRectEditor ();
 	}
 	#else
@@ -106,59 +116,69 @@ public class PanelUI : MonoBehaviour, IObjetoRectAutoajustable {
 	#endif
 
 	public void actualizarAsociarComponentes(){
-		this.rectTransform = GetComponent<RectTransform> ();
-		this.meshFilter = GetComponent<MeshFilter> ();
-		this.meshRenderer = GetComponent<MeshRenderer> ();
-	}
+        this.rectTransform = UtilComponentes.getCrearComponenteRequerido<RectTransform>(gameObject);
+		this.meshFilter = UtilComponentes.getCrearComponenteRequerido<MeshFilter>(gameObject);
+		this.meshRenderer = UtilComponentes.getCrearComponenteRequerido<MeshRenderer>(gameObject);
+    }
 	//---------------------------------------------------
 	//-----------------AUTOGENERADO----------------------
 
 	void generarMesh(){
 		Vector3[] esquinas = new Vector3[4];
 		this.rectTransform.GetLocalCorners (esquinas);
-		//=== Diagrama de los vértices ===
-		//
-		//        x0    x1      x2    x3
-		//
-		//   y0   0 --- 1 ----- 2 --- 3
-		//        |  A  |   B   |  C  |
-		//   y1   4 --- 5 ----- 6 --- 7
-		//        |  D  |   E   |  F  |
-		//   y2   8 --- 9 -----10 ---11
-		//        |  G  |   H   |  I  |
-		//   y3  12 ---13 -----14 ---15
-		//
-		// esquinas[0] = 12, esquinas[1] = 0, esquinas[2] = 3, esquinas[3] = 15
+        //=== Diagrama de los vértices ===
+        //
+        //        x0    x1      x2    x3
+        //
+        //   y0   0 --- 1 ----- 2 --- 3
+        //        |  A  |   B   |  C  |
+        //   y1   4 --- 5 ----- 6 --- 7
+        //        |  D  |   E   |  F  |
+        //   y2   8 --- 9 -----10 ---11
+        //        |  G  |   H   |  I  |
+        //   y3  12 ---13 -----14 ---15
+        //
+        // esquinas[0] = 12, esquinas[1] = 0, esquinas[2] = 3, esquinas[3] = 15
 
-		//Vector2 esqTopLeft = this.tamanoEsquinaTopLeft;
-		
-		//bool hayEspacioHorizontal;
-		float minAncho = (spriteReferencia.border.z * this.tamanoEsquinaTopLeft.x) / spriteReferencia.border.x + this.tamanoEsquinaTopLeft.x;
-		float minAlto = (spriteReferencia.border.y * this.tamanoEsquinaTopLeft.y) / spriteReferencia.border.w + this.tamanoEsquinaTopLeft.y;
+        //Vector2 esqTopLeft = this.tamanoEsquinaTopLeft;
+
+        //bool hayEspacioHorizontal;
+        if(this.presetPanelUI == null)
+        {
+            Debug.Log("Mesh no se pudo generar, falta asignar Preset al PanelUI del GameObject " + this.gameObject.name);
+            return;
+        }
+        Vector2 tamanoEsquinaTopLeft = new Vector2(
+            this.presetPanelUI.tamanoEsquinaTopLeftX.getValorPx(this.rectTransform),
+            this.presetPanelUI.tamanoEsquinaTopLeftY.getValorPx(this.rectTransform)
+            );
+
+		float minAncho = (presetPanelUI.spriteReferencia.border.z * tamanoEsquinaTopLeft.x) / presetPanelUI.spriteReferencia.border.x + tamanoEsquinaTopLeft.x;
+		float minAlto = (presetPanelUI.spriteReferencia.border.y * tamanoEsquinaTopLeft.y) / presetPanelUI.spriteReferencia.border.w + tamanoEsquinaTopLeft.y;
 
 		bool hayEspacioX = this.rectTransform.rect.width > minAncho;
 		bool hayEspacioY = this.rectTransform.rect.height > minAlto;
 		float xTopLeft, yTopLeft;
 
 		if (!hayEspacioX) {
-			xTopLeft = (this.tamanoEsquinaTopLeft.x * this.rectTransform.rect.width) / minAncho;
+			xTopLeft = (tamanoEsquinaTopLeft.x * this.rectTransform.rect.width) / minAncho;
 		} else {
-			xTopLeft = this.tamanoEsquinaTopLeft.x;
+			xTopLeft = tamanoEsquinaTopLeft.x;
 		}
 
 		if (!hayEspacioY) {
-			yTopLeft = (this.tamanoEsquinaTopLeft.y * this.rectTransform.rect.height) / minAlto;
+			yTopLeft = (tamanoEsquinaTopLeft.y * this.rectTransform.rect.height) / minAlto;
 		} else {
-			yTopLeft = this.tamanoEsquinaTopLeft.y;
+			yTopLeft = tamanoEsquinaTopLeft.y;
 		}
 
 		Vector2 esqTopLeft = new Vector2 (xTopLeft, yTopLeft);
-		Vector2 esqBottomRight = new Vector2 ((spriteReferencia.border.z * esqTopLeft.x) / spriteReferencia.border.x,
-			(spriteReferencia.border.y * esqTopLeft.y) / spriteReferencia.border.w);
+		Vector2 esqBottomRight = new Vector2 ((presetPanelUI.spriteReferencia.border.z * esqTopLeft.x) / presetPanelUI.spriteReferencia.border.x,
+			(presetPanelUI.spriteReferencia.border.y * esqTopLeft.y) / presetPanelUI.spriteReferencia.border.w);
 
-		float anchoTotalEsquinas = spriteReferencia.border.x + spriteReferencia.border.z;
-		float altoTotalEsquinas = spriteReferencia.border.y + spriteReferencia.border.w;
-		Vector2 uvsTL = new Vector2 (spriteReferencia.border.x / anchoTotalEsquinas, spriteReferencia.border.y / altoTotalEsquinas);
+		float anchoTotalEsquinas = presetPanelUI.spriteReferencia.border.x + presetPanelUI.spriteReferencia.border.z;
+		float altoTotalEsquinas = presetPanelUI.spriteReferencia.border.y + presetPanelUI.spriteReferencia.border.w;
+		Vector2 uvsTL = new Vector2 (presetPanelUI.spriteReferencia.border.x / anchoTotalEsquinas, presetPanelUI.spriteReferencia.border.y / altoTotalEsquinas);
 
 		float posZ = esquinas [0].z;
 
@@ -172,7 +192,7 @@ public class PanelUI : MonoBehaviour, IObjetoRectAutoajustable {
 		float y3 = esquinas [0].y;
 		float y2 = y3 + esqBottomRight.y;
 
-		if (this.pixelPerfect) {
+		if (this.presetPanelUI.pixelPerfect) {
 			float offX = rectTransform.rect.center.x % 1.0F;
 			float offY = rectTransform.rect.center.y % 1.0F;
 
@@ -228,10 +248,10 @@ public class PanelUI : MonoBehaviour, IObjetoRectAutoajustable {
 		//=====LADOS HORIZONTALES=====
 		MeshGen.anadirSubmesh (4);
 		if (hayEspacioX) {
-			float centroX = spriteReferencia.texture.width - spriteReferencia.border.x - spriteReferencia.border.z;
-			centroX = (centroX * esqTopLeft.x) / spriteReferencia.border.x;
+			float centroX = presetPanelUI.spriteReferencia.texture.width - presetPanelUI.spriteReferencia.border.x - presetPanelUI.spriteReferencia.border.z;
+			centroX = (centroX * esqTopLeft.x) / presetPanelUI.spriteReferencia.border.x;
 			repeticionesX = (this.rectTransform.rect.width - esqTopLeft.x - esqBottomRight.x) / centroX;
-			if (this.tipoRepeticion == TipoRepeticionPanelUI.AJUSTAR) {
+			if (this.presetPanelUI.tipoRepeticion == TipoRepeticionPanelUI.AJUSTAR) {
 				repeticionesX = Mathf.Round (repeticionesX);
 			}
 
@@ -244,10 +264,10 @@ public class PanelUI : MonoBehaviour, IObjetoRectAutoajustable {
 		//=====LADOS VERTICALES=====
 		MeshGen.anadirSubmesh (4);
 		if (hayEspacioY) {
-			float centroY = spriteReferencia.texture.height - spriteReferencia.border.y - spriteReferencia.border.w;
-			centroY = (centroY * esqTopLeft.y) / spriteReferencia.border.w;
+			float centroY = presetPanelUI.spriteReferencia.texture.height - presetPanelUI.spriteReferencia.border.y - presetPanelUI.spriteReferencia.border.w;
+			centroY = (centroY * esqTopLeft.y) / presetPanelUI.spriteReferencia.border.w;
 			repeticionesY = (this.rectTransform.rect.height - esqTopLeft.y - esqBottomRight.y) / centroY;
-			if (this.tipoRepeticion == TipoRepeticionPanelUI.AJUSTAR) {
+			if (this.presetPanelUI.tipoRepeticion == TipoRepeticionPanelUI.AJUSTAR) {
 				repeticionesY = Mathf.Round (repeticionesY);
 			}
 
@@ -269,7 +289,12 @@ public class PanelUI : MonoBehaviour, IObjetoRectAutoajustable {
 
 	#if UNITY_EDITOR
 	void generarSubMateriales(){
-		PanelUIGrupoMats pgm = PanelUIManager.getGrupoMateriales (this.material, this.spriteReferencia.border);
+        if(this.presetPanelUI == null)
+        {
+            Debug.Log("No hay Preset asignado para el PanelUI del GameObject " + this.gameObject.name);
+            return;
+        }
+		PanelUIGrupoMats pgm = PanelUIManager.getGrupoMateriales (this.presetPanelUI.material, this.presetPanelUI.spriteReferencia.border);
 		this.matEsquinas = pgm.matEsquinas;
 		this.matHorizontal = pgm.matHorizontal;
 		this.matVertical = pgm.matVertical;
@@ -282,6 +307,10 @@ public class PanelUI : MonoBehaviour, IObjetoRectAutoajustable {
 		mats [3] = this.matCentro;
 		this.meshRenderer.sharedMaterials = mats;
 	}
-	#endif
-	//---------------------------------------------------
+#endif
+    //---------------------------------------------------
+    //----------------COMPORTAMIENTO---------------------
+    
+
+    //---------------------------------------------------
 }
